@@ -1,0 +1,164 @@
+{
+  "name": "Sumit Kumar",
+  "education": {
+    "degree": "Master of Computer Applications (M.C.A)",
+    "college": "National Institute of Technology Jamshedpur",
+    "cgpa": "6.98"
+  },
+  "skills": [
+    "HTML/CSS",
+    "Tailwind CSS",
+    "JavaScript",
+    "React",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "MySQL",
+    "C++",
+    "Java",
+    "Python",
+    "Git",
+    "GitHub",
+    "VS Code"
+  ],
+  "soft_skills": [
+    "Problem solving",
+    "Continuous learning",
+    "Team collaboration",
+    "Adaptability",
+    "Communication"
+  ],
+  "career_goals": {
+    "short_term": "To work as a software or AI-focused developer and gain practical experience by building real-world applications.",
+    "long_term": "To become a strong AI/software engineer capable of designing and building useful production-level applications."
+  },
+  "interests": [
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Full Stack Development",
+    "LLM applications"
+  ],
+  "professional_preferences": {
+    "work_environment": "Collaborative environment where I can learn, contribute and work on real-world problems.",
+    "learning_approach": "Learning by building projects and solving practical problems."
+  },
+  "behavioral_profile": {
+    "strengths": [
+      "Problem solving",
+      "Continuous learning",
+      "Adaptability",
+      "Team collaboration",
+      "Learning new technologies through practical projects"
+    ],
+    "motivation": "I am motivated by opportunities where I can solve practical problems, learn new technologies, and contribute to real-world software or AI applications.",
+    "work_style": "I prefer a structured but collaborative work environment where I can understand the problem clearly, break it into smaller tasks, implement a solution, test it, and improve it based on feedback.",
+    "teamwork": "I am comfortable collaborating with others, discussing ideas, accepting feedback, and contributing to shared project goals.",
+    "learning_style": "I learn best by combining concepts with hands-on implementation. I usually understand a technology more deeply when I use it to build a real project.",
+    "problem_solving_approach": "When I face a difficult problem, I first try to understand the exact requirement, break the problem into smaller parts, explore possible solutions, implement one approach, test it, and improve it if necessary.",
+    "handling_feedback": "I see constructive feedback as an opportunity to improve. I try to understand the reason behind the feedback and apply it to my work.",
+    "handling_new_technology": "When I need to learn a new technology, I first understand the core concepts and then build a small practical implementation before using it in a larger project.",
+    "preferred_roles": [
+      "Software Developer",
+      "Full Stack Developer",
+      "Backend Developer",
+      "Junior AI Developer",
+      "AI/ML-focused Software Developer"
+    ],
+    "why_should_we_hire": "Sumit has experience building full-stack, machine-learning, and AI-oriented projects. He has worked with technologies such as React, Node.js, MongoDB, Python, Pydantic, LLMs, and NLP concepts. His profile also shows consistent problem solving through 300+ programming problems and a strong interest in learning through practical projects.",
+    "career_direction": "Sumit wants to grow at the intersection of software engineering and artificial intelligence by building practical, production-oriented applications.",
+    "ideal_opportunity": "A role where Sumit can contribute to real products, strengthen his software engineering fundamentals, work with experienced developers, and gradually take on more responsibility in AI or backend-focused development."
+  },
+  "hr_questions": {
+    "tell_me_about_yourself": "Sumit Kumar is an MCA student at NIT Jamshedpur with interests in full-stack development, machine learning, and AI applications. He has built projects such as Draw.Together, a Movie Recommender App, and an AI Resume Matcher. He also completed a frontend development internship where he worked on the Karan Pest Control business website.",
+    "what_are_your_strengths": "Sumit's key strengths are problem solving, continuous learning, adaptability, team collaboration, and learning technologies through hands-on projects.",
+    "what_are_your_future_goals": "In the short term, Sumit wants to work as a software or AI-focused developer and gain practical experience by contributing to real-world applications. In the long term, he wants to become a strong AI/software engineer capable of designing and building useful production-level systems.",
+    "why_should_we_hire_you": "Sumit brings a combination of software development, problem-solving, and AI-oriented project experience. He has worked with both frontend and backend technologies, built machine-learning and LLM-related projects, and consistently practices programming and problem solving.",
+    "why_are_you_interested_in_software_development": "Sumit enjoys solving problems and turning ideas into working applications. His full-stack and AI projects reflect his interest in understanding how different parts of a software system work together.",
+    "why_are_you_interested_in_ai": "Sumit's interest in AI comes from building practical applications such as a movie recommendation system and an AI resume matcher. He is interested in using AI to solve real problems rather than only studying it theoretically.",
+    "how_do_you_learn_new_technologies": "Sumit prefers learning the core concepts first and then applying them through projects or small implementations. This practical approach helps him understand how a technology works in a real application.",
+    "how_do_you_handle_difficult_problems": "Sumit approaches difficult problems by understanding the requirement, dividing the problem into smaller components, evaluating possible approaches, implementing a solution, testing it, and improving it where necessary.",
+    "how_do_you_work_in_a_team": "Sumit values collaboration, communication, and feedback. He is comfortable discussing ideas, contributing to assigned tasks, and improving his work based on team feedback.",
+    "how_do_you_handle_feedback": "Sumit treats constructive feedback as an opportunity to improve. He tries to understand the reason behind the feedback and apply the learning to future work.",
+    "what_type_of_work_environment_do_you_prefer": "Sumit prefers a collaborative environment where he can contribute to real projects, learn from experienced team members, and continuously improve his technical skills.",
+    "what_motivates_you": "Sumit is motivated by solving practical problems, learning new technologies, and seeing something he builds become a working application.",
+    "where_do_you_see_yourself_in_five_years": "Sumit's long-term direction is to become a strong software and AI engineer with the ability to design, build, and improve production-level applications.",
+    "what_are_you_currently_focusing_on": "Sumit is currently focused on strengthening software development and AI engineering skills, particularly Python, full-stack development, LLM applications, and practical AI projects.",
+    "tell_me_about_a_project_you_are_proud_of": "The candidate profile includes multiple projects that demonstrate different areas of development. Draw.Together demonstrates full-stack development, the Movie Recommender App demonstrates machine-learning concepts, and the AI Resume Matcher demonstrates LLM, NLP, structured extraction, and Pydantic-based workflows.",
+    "what_have_you_learned_from_your_internship": "During his frontend development internship, Sumit gained practical exposure to building a real business website, designing responsive interfaces, working with reusable frontend components, and implementing interactive website sections.",
+    "what_is_your_preferred_role": "Sumit is primarily interested in software development roles where he can work on full-stack, backend, or AI-oriented applications and continue strengthening his engineering skills.",
+    "are_you_open_to_learning_new_technologies": "Yes. Continuous learning is one of Sumit's stated soft skills, and his project portfolio shows experience across multiple technologies including React, Node.js, MongoDB, Python, machine learning, and LLM-related tools.",
+    "what_is_your_biggest_weakness": "The candidate profile does not currently contain a specific weakness, so the AI should not invent one.",
+    "tell_me_about_a_failure": "The candidate profile does not contain a specific failure story, so the AI should not invent one.",
+    "tell_me_about_a_conflict_with_a_teammate": "The candidate profile does not contain a specific team-conflict example, so the AI should not invent one.",
+    "salary_expectations": "The candidate profile does not specify salary expectations.",
+    "relocation_preference": "The candidate profile does not specify relocation preferences.",
+    "notice_period": "The candidate profile does not specify a notice period."
+  },
+  "projects": [
+    {
+      "name": "Draw.Together",
+      "type": "Full Stack Project",
+      "technologies": [
+        "React",
+        "Excalidraw",
+        "Node.js",
+        "Express.js",
+        "MongoDB",
+        "Tailwind CSS"
+      ],
+      "description": "Built a web application that combines text editing and diagram creation in one workspace. Added an interactive whiteboard with drawing and editing tools. Implemented secure JWT-based user authentication with Sign Up and Login functionality."
+    },
+    {
+      "name": "Movie Recommender App",
+      "type": "ML Project",
+      "technologies": [
+        "Streamlit",
+        "Python",
+        "Pandas",
+        "NumPy",
+        "TMDB API"
+      ],
+      "description": "Built a content-based movie recommendation system using Python. Used cosine similarity to recommend movies based on movie metadata. Integrated TMDB API to display movie posters, ratings, and details. Added filtering options for genre, release year, and rating."
+    },
+    {
+      "name": "AI Resume Matcher",
+      "type": "AI/ML Project",
+      "technologies": [
+        "Python",
+        "PyMuPDF",
+        "Pydantic",
+        "LLM",
+        "NLP"
+      ],
+      "description": "Built a resume matching system to extract and analyze information from multiple resumes. Used Pydantic models to convert extracted information into structured data and compared resume information with job requirements."
+    }
+  ],
+  "experience": [
+    {
+      "company": "Shikom Internship Pvt. Ltd.",
+      "role": "Frontend Developer Intern",
+      "duration": "Dec 2025 - Jan 2026",
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Tailwind CSS",
+        "React"
+      ],
+      "project": "Karan Pest Control",
+      "description": "Contributed to the development of the official business website for pest control services with responsive and user-friendly UI design."
+    }
+  ],
+  "achievements": [
+    "Google Cloud Arcade Program 2025",
+    "Secured 8th rank in CodeNexus organized by NIT Jamshedpur",
+    "Solved 300+ programming problems",
+    "Earned 5-star gold badge on HackerRank"
+  ],
+  "certifications": [],
+  "social_links": {
+    "github": "https://github.com/sumit9596",
+    "linkedin": "https://linkedin.com/in/sumit9596/",
+    "portfolio": ""
+  }
+}
