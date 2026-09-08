@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import "./App.css";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // =========================================================
 // EDIT ME — candidate config
@@ -259,7 +260,7 @@ function App() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/match",
+        `${API_URL}/match`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
