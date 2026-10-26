@@ -1,164 +1,182 @@
 {
   "name": "Sumit Kumar",
-  "education": {
-    "degree": "Master of Computer Applications (M.C.A)",
-    "college": "National Institute of Technology Jamshedpur",
-    "cgpa": "6.98"
+  "phone": "7488746593",
+  "email": "officialsumit9596@gmail.com",
+  "location": "Jamshedpur / India (Open to relocate anywhere in India or work Remote)",
+  "social_links": {
+    "github": "https://github.com/sumit9596",
+    "linkedin": "https://linkedin.com/in/sumit9596/",
+    "portfolio": "https://personal-chat-bot-psi.vercel.app"
   },
-  "skills": [
-    "HTML/CSS",
-    "Tailwind CSS",
-    "JavaScript",
-    "React",
-    "Node.js",
-    "Express.js",
-    "MongoDB",
-    "MySQL",
-    "C++",
-    "Java",
-    "Python",
-    "Git",
-    "GitHub",
-    "VS Code"
+  "education": [
+    {
+      "degree": "Master of Computer Applications [M.C.A]",
+      "college": "National Institute of Technology Jamshedpur",
+      "duration": "May 2024 - May 2027",
+      "cgpa": "7.00"
+    },
+    {
+      "degree": "Bachelor of Computer Application [B.C.A]",
+      "college": "RLSY college, Aurangabad",
+      "duration": "May 2020 - May 2023",
+      "cgpa": "8.50"
+    }
   ],
+  "skills": {
+    "frontend": ["React", "JavaScript", "Tailwind CSS", "HTML/CSS", "Next.js"],
+    "backend": ["Node.js", "Express.js", "MongoDB", "MySQL", "REST APIs"],
+    "programming": ["C++ (Primary for DSA & Live Coding)", "Python", "Java", "C", "Data Structures & Algorithms (DSA)"],
+    "ai_ml": ["Python", "Streamlit", "Pandas", "NumPy", "PyMuPDF", "Pydantic", "LLM & NLP concepts", "Prompt Engineering", "Cosine Similarity"],
+    "tools": ["Git", "GitHub", "VS Code", "Postman", "TMDB API", "Axios"]
+  },
+  "primary_dsa_language": "C++ (Primary language for algorithmic problem solving and live technical interviews, with strong proficiency in Java and Python)",
+  "motivation": "What excites me most is building real-world products from scratch, solving challenging programming problems, and learning how AI can be used to create useful applications.",
+  "gaming_and_hobbies": {
+    "favorite_games": ["BGMI", "Chess"],
+    "physical_activity": "Regularly does exercise and fitness workouts at home.",
+    "free_time": "Explores emerging technology topics (AI/ML, GenAI, modern software development, DSA), solves programming problems, and plays BGMI and Chess."
+  },
+  "college_and_events": {
+    "hackathons": "Participated in a college hackathon at NIT Jamshedpur, collaborating closely with a team under time constraints to design and build a practical working solution.",
+    "clubs_and_societies": "Prefers dedicating core focus to deep technical learning, hands-on project building, and competitive programming.",
+    "contests": "Secured 8th Rank in CodeNexus competitive programming contest organized by NIT Jamshedpur."
+  },
+  "joining_and_work_preferences": {
+    "preferred_locations": "Open to opportunities anywhere in India (Bangalore, Hyderabad, Pune, Gurgaon/Noida, and other major tech hubs) as well as Remote opportunities.",
+    "availability": "Actively looking for internship and full-time software/AI opportunities and can join immediately or according to the company's requirement.",
+    "work_style": "Open to both fast-paced product startups and established tech MNCs. Priority is an environment focused on learning, shipping real-world products, and growing technically.",
+    "salary_expectations": "Flexible and competitive as per industry standards for fresh MCA engineers from top NITs."
+  },
   "soft_skills": [
     "Problem solving",
     "Continuous learning",
     "Team collaboration",
     "Adaptability",
-    "Communication"
+    "Clear communication",
+    "Critical thinking"
+  ],
+  "strengths": [
+    "Strong analytical and problem-solving mindset demonstrated by solving 300+ programming problems with C++ and earning 5-star HackerRank gold badges.",
+    "Fast learner with a hands-on builder philosophy — masters new frameworks (LLMs, React, FastAPI, Node) by building functional products from scratch.",
+    "Versatile skillset spanning AI/ML engineering (Python, NLP, LLMs) and full-stack software development (React, Node, Express, MongoDB).",
+    "Strong team collaborator with industry internship experience delivering a live commercial website for Karan Pest Control.",
+    "Disciplined academic track record at prestigious institutions (NIT Jamshedpur MCA with 7.00 CGPA, BCA with 8.50 CGPA)."
+  ],
+  "weaknesses": [
+    "Early perfectionism: Tendency to spend extra time refining edge cases and architecture upfront. Manages this effectively through agile timeboxing and building functional MVPs first.",
+    "Expanding enterprise DevOps: Confident in application development, database design, and cloud basics (Google Cloud Arcade 2025), and actively deepening hands-on experience with production Kubernetes clusters and large-scale CI/CD automation."
   ],
   "career_goals": {
-    "short_term": "To work as a software or AI-focused developer and gain practical experience by building real-world applications.",
-    "long_term": "To become a strong AI/software engineer capable of designing and building useful production-level applications."
+    "short_term": "To work as an AI Engineer or Software Development Engineer (SDE) at an innovative company, contributing to scalable production systems and practical AI applications.",
+    "long_term": "To evolve into a lead engineer architecting intelligent, high-impact distributed systems."
   },
-  "interests": [
-    "Artificial Intelligence",
-    "Machine Learning",
-    "Full Stack Development",
-    "LLM applications"
+  "extracurricular_activities": [
+    "Competitive Programming: Actively participates in algorithmic challenges (LeetCode, HackerRank, GeeksforGeeks) with 300+ problems solved in C++.",
+    "NIT Jamshedpur Coding Contests: Secured 8th Rank in CodeNexus competitive programming competition organized by NIT Jamshedpur.",
+    "NIT Jamshedpur Hackathon: Participated in college hackathon, building practical solutions in team collaboration.",
+    "Google Cloud Arcade Program 2025: Completed hands-on cloud computing labs and skill challenges on Google Cloud Skills Boost.",
+    "HackerRank Badges: Achieved 5-star gold badges in Problem Solving, C++, Java, and SQL."
   ],
-  "professional_preferences": {
-    "work_environment": "Collaborative environment where I can learn, contribute and work on real-world problems.",
-    "learning_approach": "Learning by building projects and solving practical problems."
-  },
   "behavioral_profile": {
     "strengths": [
-      "Problem solving",
-      "Continuous learning",
-      "Adaptability",
-      "Team collaboration",
+      "Problem solving & analytical thinking in C++",
+      "Continuous learning and quick adoption of modern tech stacks",
+      "Adaptability and composure under tight deadlines",
+      "Team collaboration and positive attitude toward feedback",
       "Learning new technologies through practical projects"
     ],
-    "motivation": "I am motivated by opportunities where I can solve practical problems, learn new technologies, and contribute to real-world software or AI applications.",
-    "work_style": "I prefer a structured but collaborative work environment where I can understand the problem clearly, break it into smaller tasks, implement a solution, test it, and improve it based on feedback.",
-    "teamwork": "I am comfortable collaborating with others, discussing ideas, accepting feedback, and contributing to shared project goals.",
-    "learning_style": "I learn best by combining concepts with hands-on implementation. I usually understand a technology more deeply when I use it to build a real project.",
-    "problem_solving_approach": "When I face a difficult problem, I first try to understand the exact requirement, break the problem into smaller parts, explore possible solutions, implement one approach, test it, and improve it if necessary.",
-    "handling_feedback": "I see constructive feedback as an opportunity to improve. I try to understand the reason behind the feedback and apply it to my work.",
-    "handling_new_technology": "When I need to learn a new technology, I first understand the core concepts and then build a small practical implementation before using it in a larger project.",
-    "preferred_roles": [
-      "Software Developer",
-      "Full Stack Developer",
-      "Backend Developer",
-      "Junior AI Developer",
-      "AI/ML-focused Software Developer"
-    ],
-    "why_should_we_hire": "Sumit has experience building full-stack, machine-learning, and AI-oriented projects. He has worked with technologies such as React, Node.js, MongoDB, Python, Pydantic, LLMs, and NLP concepts. His profile also shows consistent problem solving through 300+ programming problems and a strong interest in learning through practical projects.",
-    "career_direction": "Sumit wants to grow at the intersection of software engineering and artificial intelligence by building practical, production-oriented applications.",
-    "ideal_opportunity": "A role where Sumit can contribute to real products, strengthen his software engineering fundamentals, work with experienced developers, and gradually take on more responsibility in AI or backend-focused development."
+    "work_style": "Structured and systematic: understands the root problem clearly, breaks it down into modular milestones, builds clean implementations, tests thoroughly, and iterates based on feedback.",
+    "teamwork": "Values open communication, collaborates effectively in team settings (demonstrated during college hackathons and Shikom internship), and aligns with team sprint goals.",
+    "handling_failure": "Views technical setbacks as diagnostic milestones (e.g. debugging non-standard PDF formats in AI Resume Matcher).",
+    "conflict_resolution": "Focuses on objective data, user requirements, and quick prototypes to resolve design disagreements constructively."
   },
   "hr_questions": {
-    "tell_me_about_yourself": "Sumit Kumar is an MCA student at NIT Jamshedpur with interests in full-stack development, machine learning, and AI applications. He has built projects such as Draw.Together, a Movie Recommender App, and an AI Resume Matcher. He also completed a frontend development internship where he worked on the Karan Pest Control business website.",
-    "what_are_your_strengths": "Sumit's key strengths are problem solving, continuous learning, adaptability, team collaboration, and learning technologies through hands-on projects.",
-    "what_are_your_future_goals": "In the short term, Sumit wants to work as a software or AI-focused developer and gain practical experience by contributing to real-world applications. In the long term, he wants to become a strong AI/software engineer capable of designing and building useful production-level systems.",
-    "why_should_we_hire_you": "Sumit brings a combination of software development, problem-solving, and AI-oriented project experience. He has worked with both frontend and backend technologies, built machine-learning and LLM-related projects, and consistently practices programming and problem solving.",
-    "why_are_you_interested_in_software_development": "Sumit enjoys solving problems and turning ideas into working applications. His full-stack and AI projects reflect his interest in understanding how different parts of a software system work together.",
-    "why_are_you_interested_in_ai": "Sumit's interest in AI comes from building practical applications such as a movie recommendation system and an AI resume matcher. He is interested in using AI to solve real problems rather than only studying it theoretically.",
-    "how_do_you_learn_new_technologies": "Sumit prefers learning the core concepts first and then applying them through projects or small implementations. This practical approach helps him understand how a technology works in a real application.",
-    "how_do_you_handle_difficult_problems": "Sumit approaches difficult problems by understanding the requirement, dividing the problem into smaller components, evaluating possible approaches, implementing a solution, testing it, and improving it where necessary.",
-    "how_do_you_work_in_a_team": "Sumit values collaboration, communication, and feedback. He is comfortable discussing ideas, contributing to assigned tasks, and improving his work based on team feedback.",
-    "how_do_you_handle_feedback": "Sumit treats constructive feedback as an opportunity to improve. He tries to understand the reason behind the feedback and apply the learning to future work.",
-    "what_type_of_work_environment_do_you_prefer": "Sumit prefers a collaborative environment where he can contribute to real projects, learn from experienced team members, and continuously improve his technical skills.",
-    "what_motivates_you": "Sumit is motivated by solving practical problems, learning new technologies, and seeing something he builds become a working application.",
-    "where_do_you_see_yourself_in_five_years": "Sumit's long-term direction is to become a strong software and AI engineer with the ability to design, build, and improve production-level applications.",
-    "what_are_you_currently_focusing_on": "Sumit is currently focused on strengthening software development and AI engineering skills, particularly Python, full-stack development, LLM applications, and practical AI projects.",
-    "tell_me_about_a_project_you_are_proud_of": "The candidate profile includes multiple projects that demonstrate different areas of development. Draw.Together demonstrates full-stack development, the Movie Recommender App demonstrates machine-learning concepts, and the AI Resume Matcher demonstrates LLM, NLP, structured extraction, and Pydantic-based workflows.",
-    "what_have_you_learned_from_your_internship": "During his frontend development internship, Sumit gained practical exposure to building a real business website, designing responsive interfaces, working with reusable frontend components, and implementing interactive website sections.",
-    "what_is_your_preferred_role": "Sumit is primarily interested in software development roles where he can work on full-stack, backend, or AI-oriented applications and continue strengthening his engineering skills.",
-    "are_you_open_to_learning_new_technologies": "Yes. Continuous learning is one of Sumit's stated soft skills, and his project portfolio shows experience across multiple technologies including React, Node.js, MongoDB, Python, machine learning, and LLM-related tools.",
-    "what_is_your_biggest_weakness": "The candidate profile does not currently contain a specific weakness, so the AI should not invent one.",
-    "tell_me_about_a_failure": "The candidate profile does not contain a specific failure story, so the AI should not invent one.",
-    "tell_me_about_a_conflict_with_a_teammate": "The candidate profile does not contain a specific team-conflict example, so the AI should not invent one.",
-    "salary_expectations": "The candidate profile does not specify salary expectations.",
-    "relocation_preference": "The candidate profile does not specify relocation preferences.",
-    "notice_period": "The candidate profile does not specify a notice period."
+    "what_are_your_hobbies": "In his free time, Sumit enjoys playing BGMI and Chess, working out at home, and exploring emerging tech topics in AI/ML, GenAI, and DSA.",
+    "what_is_your_favorite_game": "Sumit's favorite games are BGMI (Battlegrounds Mobile India) and Chess. Chess sharpens his tactical thinking and BGMI is his favorite way to relax with friends.",
+    "do_you_play_any_sports": "Sumit regularly does exercise and fitness workouts at home rather than playing outdoor sports.",
+    "what_is_your_primary_coding_language": "Sumit's primary and most confident language for Data Structures, Algorithms (DSA), and live coding interviews is C++. He is also proficient in Python and Java.",
+    "have_you_participated_in_hackathons": "Yes, Sumit participated in a college hackathon at NIT Jamshedpur, where he collaborated with a team under time constraints to build a functional solution.",
+    "are_you_in_any_college_clubs": "At NIT Jamshedpur, Sumit prefers dedicating his primary focus to academics, self-directed project building, and competitive programming.",
+    "what_is_your_weakness": "Sumit's primary area of growth is early perfectionism (spending extra time over-refining edge cases), which he balances through agile timeboxing and building functional MVPs first. He is also actively expanding his hands-on experience with enterprise Kubernetes and CI/CD pipelines.",
+    "what_are_your_strengths": "Sumit's core strengths are strong problem solving in C++ (300+ coding problems solved, HackerRank gold badges), rapid continuous learning, adaptability, team collaboration, and a hands-on project builder mindset spanning AI and full-stack development.",
+    "what_are_your_future_goals": "In the short term, Sumit aims to contribute as an AI Engineer or SDE building scalable, real-world applications. In the long term, he aspires to become a lead engineer architecting intelligent, high-performance systems.",
+    "why_should_we_hire_you": "Sumit brings a strong blend of software engineering fundamentals (NIT Jamshedpur MCA), competitive problem solving in C++ (300+ DSA problems), and hands-on project experience in both full-stack (React, Node, Express, MongoDB) and AI/LLM engineering (Python, NLP, PyMuPDF, Pydantic).",
+    "tell_me_about_yourself": "Sumit Kumar is an MCA student at NIT Jamshedpur. He specializes in AI/ML applications (Python, LLMs, NLP) and full-stack web development (React, Node.js, Express, MongoDB) with C++ as his primary language for algorithmic problem solving. He has built notable projects like AI Resume Matcher and Draw.Together, completed an industry frontend internship, and solved 300+ coding problems.",
+    "are_you_willing_to_relocate": "Yes, Sumit is completely open and eager to relocate anywhere in India (Bangalore, Hyderabad, Pune, Gurgaon/Noida, etc.) or work in remote arrangements.",
+    "salary_expectations": "Sumit is flexible and expects competitive compensation aligned with market benchmarks and company standards for fresh MCA engineers from top NITs.",
+    "notice_period": "Sumit is ready to join immediately for internships or full-time opportunities as per the company's requirement.",
+    "what_motivates_you": "What excites Sumit most is building real-world products from scratch, solving challenging programming problems, and learning how AI can be used to create useful applications."
   },
   "projects": [
     {
-      "name": "Draw.Together",
-      "type": "Full Stack Project",
-      "technologies": [
-        "React",
-        "Excalidraw",
-        "Node.js",
-        "Express.js",
-        "MongoDB",
-        "Tailwind CSS"
-      ],
-      "description": "Built a web application that combines text editing and diagram creation in one workspace. Added an interactive whiteboard with drawing and editing tools. Implemented secure JWT-based user authentication with Sign Up and Login functionality."
-    },
-    {
-      "name": "Movie Recommender App",
-      "type": "ML Project",
-      "technologies": [
-        "Streamlit",
-        "Python",
-        "Pandas",
-        "NumPy",
-        "TMDB API"
-      ],
-      "description": "Built a content-based movie recommendation system using Python. Used cosine similarity to recommend movies based on movie metadata. Integrated TMDB API to display movie posters, ratings, and details. Added filtering options for genre, release year, and rating."
-    },
-    {
+      "id": "ai-resume-matcher",
       "name": "AI Resume Matcher",
       "type": "AI/ML Project",
-      "technologies": [
-        "Python",
-        "PyMuPDF",
-        "Pydantic",
-        "LLM",
-        "NLP"
-      ],
-      "description": "Built a resume matching system to extract and analyze information from multiple resumes. Used Pydantic models to convert extracted information into structured data and compared resume information with job requirements."
+      "technologies": ["Python", "PyMuPDF", "Pydantic", "LLM", "NLP"],
+      "bullets": [
+        "Built a resume matching system using Python to extract and analyze information from multiple resumes.",
+        "Used PyMuPDF and Pydantic to extract resume data and convert it into structured information.",
+        "Compared resume information with job requirements to find relevant candidates based on their skills."
+      ]
+    },
+    {
+      "id": "draw-together",
+      "name": "Draw.Together",
+      "type": "Full Stack Project",
+      "technologies": ["Next.js", "React", "TypeScript", "Node.js", "Express.js", "MongoDB", "Tailwind CSS", "Excalidraw"],
+      "bullets": [
+        "Built a web application combining text editing and diagram creation in one workspace.",
+        "Added an interactive whiteboard with drawing tools and implemented secure JWT-based authentication.",
+        "Implemented real-time collaboration canvas with responsive Tailwind CSS interface."
+      ]
+    },
+    {
+      "id": "online-book-store",
+      "name": "Online Book Store Application",
+      "type": "Full Stack Project",
+      "date": "Dec 2025",
+      "technologies": ["React", "JavaScript", "HTML/CSS", "Node.js", "Express.js", "MongoDB", "Axios", "Tailwind CSS"],
+      "bullets": [
+        "Developed a full-stack online bookstore application using React, Node.js, Express.js, and MongoDB.",
+        "Implemented secure JWT-based user authentication with Sign Up and Login and connected frontend with backend APIs using Axios.",
+        "Built features for browsing, and managing books with real-time data updates.",
+        "Designed a responsive and modern user interface using Tailwind CSS for seamless experience across devices.",
+        "Integrated shopping cart functionality and connected frontend with backend APIs."
+      ]
+    },
+    {
+      "id": "movie-recommender",
+      "name": "Movie Recommender App",
+      "type": "ML Project",
+      "date": "Mar 2026",
+      "technologies": ["Streamlit", "Python", "Pandas", "NumPy", "TMDB API"],
+      "bullets": [
+        "Developed a content-based Movie Recommender System using Python and Streamlit to suggest movies based on similarity scores.",
+        "Implemented cosine similarity with movie metadata and tags to generate personalized movie recommendations.",
+        "Integrated the TMDB API to display movie posters, ratings, and detailed movie information dynamically.",
+        "Added advanced filtering options including genre, release year, and rating for improved user experience.",
+        "Optimized application performance using caching techniques and designed a fully responsive UI with dark/light theme toggle."
+      ]
     }
   ],
   "experience": [
     {
       "company": "Shikom Internship Pvt. Ltd.",
       "role": "Frontend Developer Intern",
-      "duration": "Dec 2025 - Jan 2026",
-      "technologies": [
-        "HTML",
-        "CSS",
-        "JavaScript",
-        "Tailwind CSS",
-        "React"
-      ],
+      "duration": "Dec 2025 – Jan 2026",
       "project": "Karan Pest Control",
-      "description": "Contributed to the development of the official business website for pest control services with responsive and user-friendly UI design."
+      "technologies": ["HTML", "CSS", "JavaScript", "Tailwind CSS", "React"],
+      "bullets": [
+        "Contributed to the development of the official business website for pest control services with responsive UI, interactive service sections, and contact forms to improve user experience and customer engagement.",
+        "Designed and optimized reusable frontend components using HTML, CSS, JavaScript, Tailwind CSS, and React, ensuring cross-device compatibility and consistent UI performance.",
+        "Improved website performance and visual consistency through reusable styling and optimized frontend structure."
+      ]
     }
   ],
   "achievements": [
-    "Google Cloud Arcade Program 2025",
-    "Secured 8th rank in CodeNexus organized by NIT Jamshedpur",
-    "Solved 300+ programming problems",
-    "Earned 5-star gold badge on HackerRank"
-  ],
-  "certifications": [],
-  "social_links": {
-    "github": "https://github.com/sumit9596",
-    "linkedin": "https://linkedin.com/in/sumit9596/",
-    "portfolio": ""
-  }
+    "Google Cloud Arcade Program 2025 – Completed basic cloud computing labs and skill challenges using Google Cloud Skills Boost.",
+    "Secured 8th rank in CodeNexus organised by the NIT Jamshedpur.",
+    "Achieved by solving 300+ problems across coding platforms.",
+    "Earned 5-star gold badge on HackerRank in Problem Solving, C++, Java, and SQL."
+  ]
 }

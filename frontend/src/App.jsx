@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "./App.css";
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -40,16 +41,28 @@ const CHECKLIST_ITEMS = [
 // ICONS
 // =========================================================
 
-function EnterIcon() {
+function CopyIcon() {
   return (
-    <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M13 4v3.5a1.5 1.5 0 0 1-1.5 1.5H4M4 9l3-3M4 9l3 3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+      <rect x="5" y="5" width="8.5" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M3.5 10.5H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h6.5a1 1 0 0 1 1 1v0.5" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+      <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SendArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
     </svg>
   );
 }
@@ -121,14 +134,40 @@ function App() {
 
   // --- chat state ---
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem("chat_messages");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem("chat_messages", JSON.stringify(messages));
+      }
+    } catch {
+      // Ignore storage errors
+    }
+  }, [messages]);
+
+  function handleCopy(text, index) {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  }
 
   // --- mode state ---
   const [mode, setMode] = useState("chat");
   const [jobDescription, setJobDescription] = useState("");
   const [matchResult, setMatchResult] = useState(null);
   const [matchLoading, setMatchLoading] = useState(false);
+  const [matchError, setMatchError] = useState("");
 
   const scrollRef = useRef(null);
   const gutterRef = useRef(null);
@@ -161,14 +200,15 @@ function App() {
   async function sendMessage(overrideText) {
 
     const text = (overrideText ?? input).trim();
-    if (!text) return;
+    if (!text || loading) return;
 
     const userMessage = { role: "user", content: text };
 
     setInput("");
 
-    const conversationHistory = [...messages, userMessage];
-    setMessages(conversationHistory);
+    // Prior messages before adding current user message (fixes duplication bug)
+    const priorHistory = messages;
+    setMessages([...priorHistory, userMessage]);
     setLoading(true);
 
     try {
@@ -180,45 +220,67 @@ function App() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             question: userMessage.content,
-            history: conversationHistory,
+            history: priorHistory,
           }),
         }
       );
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        if (response.status === 429) {
+          throw new Error("Rate limit exceeded. Please wait a moment before sending another message.");
+        }
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || `Server error: ${response.status}`);
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let assistantAnswer = "";
+      let streamedAnswer = "";
 
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
+      let chunkCount = 0;
       while (true) {
 
         const { value, done } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        assistantAnswer += chunk;
+        streamedAnswer += chunk;
+        chunkCount += 1;
 
-        setMessages((prev) => {
-          const updated = [...prev];
-          const lastIndex = updated.length - 1;
-          updated[lastIndex] = { ...updated[lastIndex], content: assistantAnswer };
-          return updated;
-        });
+        // Throttle UI re-renders every 3 chunks to eliminate DOM stutter on mobile
+        if (chunkCount % 3 === 0) {
+          const currentText = streamedAnswer;
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastIndex = updated.length - 1;
+            updated[lastIndex] = { ...updated[lastIndex], content: currentText };
+            return updated;
+          });
+        }
 
       }
+
+      // Final commit ensuring 100% of streamed tokens are rendered
+      const finalText = streamedAnswer;
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastIndex = updated.length - 1;
+        updated[lastIndex] = { ...updated[lastIndex], content: finalText };
+        return updated;
+      });
 
     } catch (error) {
 
       console.error("Chat error:", error);
+      const errorMessage = error.message?.includes("Rate limit")
+        ? "⚠️ Rate limit reached. Please wait a few seconds before asking your next question."
+        : "Sorry, something went wrong while generating the response. Please try again.";
 
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "Sorry, something went wrong. Please try again." },
+        { role: "assistant", content: errorMessage },
       ]);
 
     } finally {
@@ -243,6 +305,11 @@ function App() {
   function handleNewChat() {
     setMessages([]);
     setInput("");
+    try {
+      localStorage.removeItem("chat_messages");
+    } catch {
+      // Ignore
+    }
   }
 
 
@@ -256,6 +323,7 @@ function App() {
 
     setMatchLoading(true);
     setMatchResult(null);
+    setMatchError("");
 
     try {
 
@@ -269,7 +337,11 @@ function App() {
       );
 
       if (!response.ok) {
-        throw new Error(`Match API error: ${response.status}`);
+        if (response.status === 429) {
+          throw new Error("Rate limit exceeded. Please wait a moment before running fit analysis again.");
+        }
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Match API error: ${response.status}`);
       }
 
       const data = await response.json();
@@ -278,7 +350,7 @@ function App() {
     } catch (error) {
 
       console.error("Job matching error:", error);
-      alert("Job matching failed. Please check whether the backend is running.");
+      setMatchError(error.message || "Job matching failed. Please verify that the backend server is running.");
 
     } finally {
 
@@ -367,6 +439,18 @@ function App() {
                 {file.name}
               </button>
             ))}
+
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tree-file"
+              style={{ textDecoration: "none", color: "inherit", display: "flex", alignItems: "center" }}
+              title="View / Download Sumit's Resume (PDF)"
+            >
+              <span className="file-dot" style={{ background: "#f43f5e" }} />
+              resume.pdf ↗
+            </a>
 
           </div>
 
@@ -464,72 +548,124 @@ function App() {
               <div className="console" ref={scrollRef}>
 
                 {messages.length === 0 && (
-
                   <div className="motd">
-                    <p className="motd-title">
-                      <span className="motd-accent">sumit-ai</span> v1.0
-                    </p>
-                    <p className="motd-sub">
-                      Ask a question below, or open a file from the explorer.
-                    </p>
-                    <p className="motd-prompt">
-                      <span className="prompt-amber">$</span>
-                      <span className="cursor-blink" />
-                    </p>
-                  </div>
+                    <div className="motd-badge">
+                      <span className="badge-pulse" />
+                      <span>Online · Sumit Kumar Portfolio AI</span>
+                    </div>
 
+                    <h1 className="motd-headline">
+                      Hi! Ask me anything about <span className="text-gradient">Sumit</span>
+                    </h1>
+
+                    <p className="motd-desc">
+                      MCA student at <strong>NIT Jamshedpur</strong> specializing in <strong>AI/ML Engineering</strong> and <strong>Full-Stack Development</strong>. Type your question below or click a starter:
+                    </p>
+
+                    <div className="motd-starters">
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("What projects has Sumit built?")}
+                      >
+                        <span className="starter-icon">🚀</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Projects</span>
+                          <span className="starter-query">AI Resume Matcher, Draw.Together...</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("What is Sumit's technical skillset and background?")}
+                      >
+                        <span className="starter-icon">⚡</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Tech Stack</span>
+                          <span className="starter-query">Python, React, Node.js, C++ DSA...</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("Tell me about his education and internship experience")}
+                      >
+                        <span className="starter-icon">🎓</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Experience & College</span>
+                          <span className="starter-query">NIT Jamshedpur (MCA) & Shikom Intern</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("sumit kon hai batana")}
+                      >
+                        <span className="starter-icon">💬</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Hindi / Hinglish</span>
+                          <span className="starter-query">Sumit ke baare me Hindi me jaano</span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 <div className="log">
+                  {messages.map((message, index) => {
+                    const isLast = index === messages.length - 1;
+                    const isStreamingThis = loading && isLast && message.role === "assistant";
+                    const isWaitingFirstToken = isStreamingThis && !message.content;
 
-                  {messages.map((message, index) => (
+                    return (
+                      <div
+                        key={index}
+                        className={`log-line log-line--${message.role}`}
+                      >
+                        <span className="log-prefix">
+                          {message.role === "user" ? "$" : ">"}
+                        </span>
 
-                    <div
-                      key={index}
-                      className={`log-line log-line--${message.role}`}
-                    >
-
-                      <span className="log-prefix">
-                        {message.role === "user" ? "$" : ">"}
-                      </span>
-
-                      <div className="log-content">
-
-                        {message.role === "user" ? (
-                          <span className="log-text">{message.content}</span>
-                        ) : (
-                          <div className="ai-response">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
-                        )}
-
+                        <div className="log-content">
+                          {message.role === "user" ? (
+                            <span className="log-text">{message.content}</span>
+                          ) : isWaitingFirstToken ? (
+                            <div className="ai-thinking">
+                              <span className="thinking-pulse" />
+                              <span className="thinking-text">Thinking...</span>
+                            </div>
+                          ) : (
+                            <div className="ai-bubble">
+                              <div className="ai-response">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+                                {isStreamingThis && <span className="streaming-cursor">▊</span>}
+                              </div>
+                              {!isStreamingThis && message.content && (
+                                <div className="ai-actions">
+                                  <button
+                                    className="action-btn copy-btn"
+                                    onClick={() => handleCopy(message.content, index)}
+                                    title="Copy response"
+                                  >
+                                    {copiedIndex === index ? <CheckIcon /> : <CopyIcon />}
+                                    <span>{copiedIndex === index ? "Copied!" : "Copy"}</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
-
-                    </div>
-
-                  ))}
-
-                  {loading && (
-
-                    <div className="log-line log-line--assistant">
-                      <span className="log-prefix">&gt;</span>
-                      <div className="log-content log-content--pending">
-                        generating response
-                        <span className="cursor-blink" />
-                      </div>
-                    </div>
-
-                  )}
-
+                    );
+                  })}
                 </div>
 
               </div>
 
               <div className="input-dock">
-
-                <div className="input-line">
-
-                  <span className="input-prompt">$</span>
+                <div className="input-box">
+                  <div className="input-prefix">
+                    <span className="terminal-symbol">$</span>
+                  </div>
 
                   <textarea
                     value={input}
@@ -541,20 +677,14 @@ function App() {
                   />
 
                   <button
-                    className="run-btn"
+                    className={`send-btn ${input.trim() ? "send-btn--active" : ""}`}
                     onClick={() => sendMessage()}
                     disabled={loading || !input.trim()}
                     aria-label="Send message"
                   >
-                    <EnterIcon />
+                    <SendArrowIcon />
                   </button>
-
                 </div>
-
-                <p className="disclaimer">
-                  // answers are generated only from the candidate profile
-                </p>
-
               </div>
 
             </>
@@ -611,6 +741,21 @@ function App() {
                 >
                   {matchLoading ? "Running…" : "▶ Run analysis"}
                 </button>
+
+                {matchError && (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "10px 14px",
+                    background: "rgba(244, 63, 94, 0.12)",
+                    border: "1px solid rgba(244, 63, 94, 0.35)",
+                    borderRadius: "6px",
+                    color: "#fb7185",
+                    fontSize: "13px",
+                    lineHeight: "1.4"
+                  }}>
+                    ⚠ {matchError}
+                  </div>
+                )}
 
               </div>
 
