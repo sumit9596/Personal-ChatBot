@@ -6,189 +6,77 @@ import "./App.css";
 const API_URL = import.meta.env.VITE_API_URL;
 
 // =========================================================
-// CANDIDATE DATA
+// CANDIDATE & BENTO CONTENT DATA
 // =========================================================
 
 const CANDIDATE = {
   name: "Sumit Kumar",
   role: "Full-Stack Developer & AI Engineer",
-  college: "NIT Jamshedpur (MCA)",
+  education: "NIT Jamshedpur (MCA)",
   location: "India",
-  status: "Available for Roles",
-  skills: {
-    languages: ["Python", "JavaScript (ES6+)", "TypeScript", "C++", "SQL", "HTML/CSS"],
-    frameworks: ["React.js", "Node.js", "Express.js", "FastAPI", "Tailwind CSS", "Streamlit"],
-    ai_ml: ["LLM Orchestration", "Groq API", "PyMuPDF", "NLP", "Cosine Similarity", "Pandas", "NumPy"],
-    tools: ["Git / GitHub", "MongoDB", "PostgreSQL", "Docker", "RESTful APIs", "JWT Auth"]
-  }
+  status: "Open to Opportunities",
 };
 
-const STARTER_PROMPTS = [
+const BENTO_PROJECTS = [
   {
-    icon: "🚀",
-    title: "Key Projects",
-    desc: "AI Resume Matcher, Draw.Together, Online Book Store, Movie Recommender",
-    prompt: "What projects has Sumit built?",
+    title: "AI Resume Matcher",
+    tag: "AI/ML & NLP",
+    desc: "Extracts resume data using PyMuPDF, matches requirements via NLP & cosine similarity.",
+    color: "#8b5cf6",
+    prompt: "Tell me all about your AI Resume Matcher project: architecture, tech stack, and how cosine similarity is used.",
   },
   {
-    icon: "⚡",
-    title: "Tech Stack & Skills",
-    desc: "Python, FastAPI, React, Node.js, C++ DSA, Groq LLM, PyMuPDF",
-    prompt: "What is Sumit's technical skillset and background?",
+    title: "Draw.Together",
+    tag: "Full-Stack & WebSockets",
+    desc: "Real-time collaborative whiteboard and canvas editor with multi-user sync & JWT auth.",
+    color: "#06b6d4",
+    prompt: "Explain the Draw.Together collaborative canvas project and how real-time sync works.",
   },
   {
-    icon: "🎓",
-    title: "Education & Experience",
-    desc: "MCA at NIT Jamshedpur & Shikom Software Internship",
-    prompt: "Tell me about his education and internship experience",
+    title: "Online Book Store",
+    tag: "MERN Stack",
+    desc: "E-commerce platform with JWT authentication, shopping cart, and admin inventory CRUD.",
+    color: "#ec4899",
+    prompt: "Describe your Online Book Store project, authentication model, and database design.",
   },
   {
-    icon: "💬",
-    title: "Hindi / Hinglish",
-    desc: "Sumit ke baare me simple Hindi me baat karein",
-    prompt: "sumit kon hai batana",
+    title: "Movie Recommender",
+    tag: "ML & Streamlit",
+    desc: "Content-based recommendation engine powered by TMDB API and cosine similarity.",
+    color: "#f59e0b",
+    prompt: "How does your Movie Recommender application calculate movie similarities?",
   },
 ];
 
-const SUGGESTION_CHIPS = [
-  "Show me his AI Resume Matcher project",
-  "What is his DSA and coding proficiency?",
-  "What was his role at Shikom?",
-  "How can I contact or hire Sumit?"
+const TECH_BADGES = [
+  { name: "Python", cat: "ai" },
+  { name: "FastAPI", cat: "backend" },
+  { name: "React.js", cat: "frontend" },
+  { name: "Node.js", cat: "backend" },
+  { name: "C++ (DSA)", cat: "core" },
+  { name: "PyMuPDF", cat: "ai" },
+  { name: "Cosine Matcher", cat: "ai" },
+  { name: "MongoDB", cat: "backend" },
+  { name: "Tailwind CSS", cat: "frontend" },
+  { name: "Streamlit", cat: "ai" },
 ];
 
-// =========================================================
-// DYNAMIC COLORFUL PARTICLE CANVAS (ALIVE BACKGROUND)
-// =========================================================
-
-function AnimatedConstellationCanvas({ theme }) {
-  const canvasRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let animationFrameId;
-
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    const isMobile = width < 768;
-    const particleCount = isMobile ? 32 : 65;
-
-    const colorsDark = [
-      "rgba(139, 92, 246, ",  // Violet
-      "rgba(6, 182, 212, ",   // Cyan
-      "rgba(236, 72, 153, ",  // Pink
-      "rgba(16, 185, 129, ",  // Emerald
-      "rgba(245, 158, 11, ",  // Amber
-    ];
-
-    const colorsLight = [
-      "rgba(99, 102, 241, ",  // Indigo
-      "rgba(14, 165, 233, ",  // Sky Blue
-      "rgba(217, 70, 239, ",  // Magenta
-      "rgba(16, 185, 129, ",  // Emerald
-      "rgba(245, 158, 11, ",  // Amber
-    ];
-
-    const palette = theme === "light" ? colorsLight : colorsDark;
-
-    const particles = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.7,
-        vy: (Math.random() - 0.5) * 0.7,
-        radius: Math.random() * 2.2 + 1.2,
-        colorBase: palette[Math.floor(Math.random() * palette.length)],
-        alpha: Math.random() * 0.5 + 0.35,
-        pulseSpeed: Math.random() * 0.02 + 0.01,
-        pulseVal: Math.random() * Math.PI,
-      });
-    }
-
-    const render = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw connections
-      const maxDist = isMobile ? 85 : 125;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < maxDist) {
-            const lineAlpha = (1 - dist / maxDist) * 0.22;
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `${particles[i].colorBase}${lineAlpha})`;
-            ctx.lineWidth = 0.8;
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Draw particles
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = width;
-        if (p.x > width) p.x = 0;
-        if (p.y < 0) p.y = height;
-        if (p.y > height) p.y = 0;
-
-        p.pulseVal += p.pulseSpeed;
-        const currentAlpha = p.alpha + Math.sin(p.pulseVal) * 0.2;
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `${p.colorBase}${Math.max(0.1, currentAlpha)})`;
-        ctx.shadowColor = `${p.colorBase}0.8)`;
-        ctx.shadowBlur = 10;
-        ctx.fill();
-        ctx.shadowBlur = 0; // reset
-      }
-
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, [theme]);
-
-  return <canvas ref={canvasRef} className="animated-neural-canvas" />;
-}
+const SUGGESTION_PILLS = [
+  "What is Sumit's educational background?",
+  "Tell me about his internship at Shikom",
+  "How does he handle DSA problem solving?",
+  "What are his core strengths in Full-Stack?",
+];
 
 // =========================================================
 // SVG ICONS
 // =========================================================
 
-function AiSparkleOrb() {
+function SparkleIcon() {
   return (
-    <div className="ai-core-orb">
-      <div className="orb-ring ring-1" />
-      <div className="orb-ring ring-2" />
-      <div className="orb-ring ring-3" />
-      <div className="orb-center-glow" />
-    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+    </svg>
   );
 }
 
@@ -242,39 +130,23 @@ function MoonIcon() {
   );
 }
 
-function ResetIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M23 4v6h-6" />
-      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-    </svg>
-  );
-}
-
-function UserBadgeIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function CloseDrawerIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function ExternalLinkIcon() {
+function ExternalIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
+function GridIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
     </svg>
   );
 }
@@ -298,11 +170,11 @@ function ChatIcon() {
 }
 
 // =========================================================
-// MAIN COMPONENT
+// MAIN APP COMPONENT
 // =========================================================
 
 function App() {
-  // Chat state
+  // Chat State
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState(() => {
     try {
@@ -315,12 +187,11 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState(null);
 
-  // Layout & UI
-  const [mode, setMode] = useState("chat"); // 'chat' | 'match'
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Mode: "chat" | "match"
+  const [mode, setMode] = useState("chat");
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
 
-  // Job match state
+  // Job Match State
   const [jobDescription, setJobDescription] = useState("");
   const [matchResult, setMatchResult] = useState(null);
   const [matchLoading, setMatchLoading] = useState(false);
@@ -335,7 +206,7 @@ function App() {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Sync messages
+  // Sync chat messages to localStorage
   useEffect(() => {
     try {
       if (messages.length > 0) {
@@ -346,7 +217,7 @@ function App() {
     }
   }, [messages]);
 
-  // Auto-scroll
+  // Auto scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -374,12 +245,11 @@ function App() {
     }
   };
 
-  // Auto-resize textarea
   const handleInputChange = (e) => {
     setInput(e.target.value);
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 140)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 130)}px`;
     }
   };
 
@@ -413,7 +283,7 @@ function App() {
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error("Rate limit reached. Please wait a few seconds before asking again.");
+          throw new Error("Rate limit reached. Please wait a moment before sending another message.");
         }
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.detail || `Server error: ${response.status}`);
@@ -455,7 +325,7 @@ function App() {
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage = error.message?.includes("Rate limit")
-        ? "⚠️ Rate limit reached. Please wait a few moments before asking your next question."
+        ? "⚠️ Rate limit reached. Please wait a few moments before sending another message."
         : "Sorry, I encountered an issue generating the response. Please try again.";
 
       setMessages((prev) => [
@@ -475,7 +345,7 @@ function App() {
   };
 
   // =========================================================
-  // MATCH JOB
+  // JOB MATCHING
   // =========================================================
 
   const handleMatchCheck = async () => {
@@ -511,83 +381,77 @@ function App() {
   };
 
   return (
-    <div className="modern-app">
-      {/* Dynamic Animated Colorful Neural Particles Canvas */}
-      <AnimatedConstellationCanvas theme={theme} />
-
-      {/* Luminous Glow Overlays */}
-      <div className="ambient-glow glow-top" />
-      <div className="ambient-glow glow-bottom" />
+    <div className="bento-app">
+      {/* Dynamic Animated Colorful Aurora Gradient Mesh in Background */}
+      <div className="bento-ambient-mesh" aria-hidden="true">
+        <div className="aurora-blob blob-violet" />
+        <div className="aurora-blob blob-cyan" />
+        <div className="aurora-blob blob-rose" />
+        <div className="aurora-blob blob-amber" />
+        <div className="ambient-grid-overlay" />
+      </div>
 
       {/* =====================================================
-          FLOATING TOP NAVIGATION BAR
+          TOP NAVIGATION BAR
       ===================================================== */}
-      <header className="floating-navbar">
-        <div className="nav-container">
+      <header className="bento-navbar">
+        <div className="navbar-inner">
           {/* Brand Left */}
-          <div className="nav-brand" onClick={() => setMode("chat")}>
-            <div className="brand-orb-mini">
-              <span className="orb-dot" />
+          <div className="nav-brand-group" onClick={() => { setMode("chat"); handleResetChat(); }}>
+            <div className="brand-logo-pill">
+              <span className="logo-sparkle">✦</span>
+              <span className="logo-text">Sumit<span className="logo-ai">.ai</span></span>
             </div>
-            <div className="brand-text">
-              <span className="brand-title">Sumit<span className="brand-accent">.ai</span></span>
-              <span className="brand-sub">NIT Jamshedpur</span>
-            </div>
+            <span className="live-status-pill">
+              <span className="status-blip" />
+              NIT Jamshedpur MCA
+            </span>
           </div>
 
-          {/* Mode Switcher Tabs */}
-          <div className="nav-tabs">
+          {/* Navigation Mode Pill */}
+          <nav className="mode-toggle-group">
             <button
-              className={`tab-pill ${mode === "chat" ? "active" : ""}`}
+              className={`mode-btn ${mode === "chat" ? "active" : ""}`}
               onClick={() => setMode("chat")}
             >
               <ChatIcon />
-              <span>Chat</span>
+              <span>AI Chat</span>
             </button>
             <button
-              className={`tab-pill ${mode === "match" ? "active" : ""}`}
+              className={`mode-btn ${mode === "match" ? "active" : ""}`}
               onClick={() => setMode("match")}
             >
               <TargetIcon />
               <span>Fit Matcher</span>
             </button>
-          </div>
+          </nav>
 
           {/* Actions Right */}
-          <div className="nav-actions">
+          <div className="nav-actions-group">
+            {mode === "chat" && messages.length > 0 && (
+              <button
+                className="action-pill-btn"
+                onClick={handleResetChat}
+                title="Return to Bento Hub"
+              >
+                <GridIcon />
+                <span className="btn-hide-mobile">Bento Hub</span>
+              </button>
+            )}
+
             <a
               href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="action-btn-pill resume-btn"
-              title="Open Sumit's Resume"
+              className="action-pill-btn resume-action-btn"
+              title="Open Sumit's Resume (PDF)"
             >
               <span>Resume PDF</span>
-              <ExternalLinkIcon />
+              <ExternalIcon />
             </a>
 
             <button
-              className="action-icon-btn"
-              onClick={() => setDrawerOpen(true)}
-              title="View Profile & Skills"
-              aria-label="Profile"
-            >
-              <UserBadgeIcon />
-            </button>
-
-            {mode === "chat" && messages.length > 0 && (
-              <button
-                className="action-icon-btn"
-                onClick={handleResetChat}
-                title="New Chat Session"
-                aria-label="Reset chat"
-              >
-                <ResetIcon />
-              </button>
-            )}
-
-            <button
-              className="action-icon-btn"
+              className="theme-circle-btn"
               onClick={toggleTheme}
               title={`Switch to ${theme === "dark" ? "Light" : "Dark"} mode`}
               aria-label="Toggle theme"
@@ -599,137 +463,150 @@ function App() {
       </header>
 
       {/* =====================================================
-          SLIDE-OUT PROFILE & SKILLS DRAWER
+          MAIN WORKSPACE
       ===================================================== */}
-      {drawerOpen && (
-        <div className="drawer-overlay" onClick={() => setDrawerOpen(false)}>
-          <div className="drawer-content" onClick={(e) => e.stopPropagation()}>
-            <div className="drawer-header">
-              <div className="drawer-brand">
-                <div className="drawer-avatar">SK</div>
-                <div>
-                  <h3 className="drawer-name">Sumit Kumar</h3>
-                  <p className="drawer-role">Full-Stack & AI Engineer</p>
-                </div>
-              </div>
-              <button
-                className="action-icon-btn close-drawer-btn"
-                onClick={() => setDrawerOpen(false)}
-                aria-label="Close drawer"
-              >
-                <CloseDrawerIcon />
-              </button>
-            </div>
-
-            <div className="drawer-body">
-              <div className="drawer-card bio-card">
-                <span className="card-badge">Education & Status</span>
-                <p className="bio-highlight">🎓 Master of Computer Applications (MCA)</p>
-                <p className="bio-sub">National Institute of Technology, Jamshedpur (NIT)</p>
-                <p className="bio-status">● {CANDIDATE.status}</p>
-              </div>
-
-              <div className="drawer-actions">
-                <a
-                  href="/resume.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="download-resume-btn"
-                >
-                  <span>Open Full Resume PDF</span>
-                  <ExternalLinkIcon />
-                </a>
-              </div>
-
-              <div className="skills-group">
-                <h4 className="skills-heading">Technical Skills</h4>
-                
-                <div className="skill-category">
-                  <span className="skill-cat-title">AI & ML</span>
-                  <div className="chip-wrap">
-                    {CANDIDATE.skills.ai_ml.map((s) => (
-                      <span key={s} className="tech-chip ai-chip">{s}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="skill-category">
-                  <span className="skill-cat-title">Frameworks & Libraries</span>
-                  <div className="chip-wrap">
-                    {CANDIDATE.skills.frameworks.map((s) => (
-                      <span key={s} className="tech-chip">{s}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="skill-category">
-                  <span className="skill-cat-title">Languages</span>
-                  <div className="chip-wrap">
-                    {CANDIDATE.skills.languages.map((s) => (
-                      <span key={s} className="tech-chip">{s}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="skill-category">
-                  <span className="skill-cat-title">Databases & Tools</span>
-                  <div className="chip-wrap">
-                    {CANDIDATE.skills.tools.map((s) => (
-                      <span key={s} className="tech-chip">{s}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* =====================================================
-          MAIN INTERACTION STAGE
-      ===================================================== */}
-      <main className="main-stage">
+      <main className="bento-main">
         {/* ===================================================
             1. CHAT MODE
         =================================================== */}
         {mode === "chat" && (
-          <div className="chat-view">
-            {/* Scrollable conversation */}
-            <div className="conversation-container" ref={scrollRef}>
+          <div className="chat-interface">
+            <div className="chat-scroll-zone" ref={scrollRef}>
               {messages.length === 0 ? (
-                <div className="hero-landing">
-                  {/* Glowing Animated AI Core */}
-                  <AiSparkleOrb />
+                /* ===========================================
+                   INTERACTIVE BENTO GRID HUB (EMPTY HERO)
+                =========================================== */
+                <div className="bento-hub-grid">
+                  {/* Tile 1: Hero Persona Card (2 Columns Wide) */}
+                  <div className="bento-tile tile-hero">
+                    <div className="hero-top">
+                      <div className="hero-avatar">
+                        <span>SK</span>
+                        <span className="hero-avatar-glow" />
+                      </div>
+                      <div className="hero-meta">
+                        <span className="status-tag">● {CANDIDATE.status}</span>
+                        <h2 className="hero-name">{CANDIDATE.name}</h2>
+                        <p className="hero-role">{CANDIDATE.role}</p>
+                      </div>
+                    </div>
 
-                  <h1 className="hero-heading">
-                    Explore <span className="text-shimmer">Sumit's Portfolio</span>
-                  </h1>
+                    <p className="hero-bio">
+                      Master of Computer Applications (MCA) student at <strong>NIT Jamshedpur</strong>. Building high-performance full-stack applications, intelligent AI matching systems, and scalable backend pipelines.
+                    </p>
 
-                  <p className="hero-description">
-                    Full-Stack Developer & AI Engineer at <strong>NIT Jamshedpur</strong>. Ask anything about his projects, coding stack, or experience.
-                  </p>
-
-                  {/* 4 Clean Prompt Cards */}
-                  <div className="prompt-cards-grid">
-                    {STARTER_PROMPTS.map((item) => (
-                      <button
-                        key={item.title}
-                        className="prompt-card"
-                        onClick={() => sendMessage(item.prompt)}
-                        disabled={loading}
+                    <div className="hero-footer-actions">
+                      <a
+                        href="/resume.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bento-btn-primary"
                       >
-                        <span className="card-emoji">{item.icon}</span>
-                        <div className="card-content">
-                          <h4 className="card-heading">{item.title}</h4>
-                          <p className="card-text">{item.desc}</p>
-                        </div>
-                        <span className="card-arrow">↗</span>
+                        <span>Download Official Resume</span>
+                        <ExternalIcon />
+                      </a>
+                      <button
+                        className="bento-btn-secondary"
+                        onClick={() => sendMessage("Tell me about Sumit's complete background and education")}
+                      >
+                        Ask Background
                       </button>
-                    ))}
+                    </div>
+                  </div>
+
+                  {/* Tile 2: AI Core Interaction Card */}
+                  <div
+                    className="bento-tile tile-ai-core"
+                    onClick={() => sendMessage("What makes Sumit stand out as a Full-Stack & AI engineer?")}
+                  >
+                    <div className="ai-core-graphic">
+                      <div className="ai-core-ring ring-ext" />
+                      <div className="ai-core-ring ring-mid" />
+                      <div className="ai-core-center">✦</div>
+                    </div>
+                    <h3 className="tile-title">Portfolio AI Core</h3>
+                    <p className="tile-desc">Instant answers on technical depth, problem-solving, and code quality.</p>
+                    <span className="tile-action-link">Click to inquire →</span>
+                  </div>
+
+                  {/* Tile 3: Key Projects Showcase (Full Row / 3 Columns Wide) */}
+                  <div className="bento-tile tile-projects">
+                    <div className="tile-header-row">
+                      <div>
+                        <span className="tile-kicker">Featured Engineering</span>
+                        <h3 className="tile-title">Key Projects Showcase</h3>
+                      </div>
+                      <span className="tile-badge">4 Featured</span>
+                    </div>
+
+                    <div className="bento-projects-subgrid">
+                      {BENTO_PROJECTS.map((proj) => (
+                        <div
+                          key={proj.title}
+                          className="project-subcard"
+                          onClick={() => sendMessage(proj.prompt)}
+                        >
+                          <div className="proj-card-top">
+                            <span className="proj-tag" style={{ color: proj.color, borderColor: `${proj.color}40`, background: `${proj.color}15` }}>
+                              {proj.tag}
+                            </span>
+                            <span className="proj-arrow">↗</span>
+                          </div>
+                          <h4 className="proj-title">{proj.title}</h4>
+                          <p className="proj-desc">{proj.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tile 4: Tech Stack Cloud */}
+                  <div className="bento-tile tile-tech">
+                    <span className="tile-kicker">Core Capabilities</span>
+                    <h3 className="tile-title">Technical Matrix</h3>
+                    <div className="tech-badge-cloud">
+                      {TECH_BADGES.map((tech) => (
+                        <button
+                          key={tech.name}
+                          className={`tech-badge-pill badge-${tech.cat}`}
+                          onClick={() => sendMessage(`What is Sumit's proficiency and experience with ${tech.name}?`)}
+                          title={`Ask about ${tech.name}`}
+                        >
+                          {tech.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Tile 5: Fit Matcher Launchpad */}
+                  <div
+                    className="bento-tile tile-matcher-launch"
+                    onClick={() => setMode("match")}
+                  >
+                    <div className="matcher-icon-box">
+                      <TargetIcon />
+                    </div>
+                    <span className="tile-kicker">Role Compatibility</span>
+                    <h3 className="tile-title">Resume Fit Screener</h3>
+                    <p className="tile-desc">Paste your job description to calculate suitability & requirement alignment.</p>
+                    <span className="tile-action-link">Open Analyzer →</span>
+                  </div>
+
+                  {/* Tile 6: Hindi Conversation */}
+                  <div
+                    className="bento-tile tile-hindi"
+                    onClick={() => sendMessage("sumit kon hai batana")}
+                  >
+                    <span className="hindi-badge">💬 हिंदी / Hinglish</span>
+                    <h3 className="tile-title">बातचीत करें</h3>
+                    <p className="tile-desc">Sumit ke baare me simple Hindi me sawal puchein aur jaaniye.</p>
+                    <span className="tile-action-link">Hindi me shuru karein →</span>
                   </div>
                 </div>
               ) : (
-                <div className="messages-thread">
+                /* ===========================================
+                   ACTIVE CONVERSATION FEED
+                =========================================== */
+                <div className="conversation-stream">
                   {messages.map((message, index) => {
                     const isLast = index === messages.length - 1;
                     const isStreaming = loading && isLast && message.role === "assistant";
@@ -738,36 +615,36 @@ function App() {
                     return (
                       <div
                         key={index}
-                        className={`chat-row ${message.role === "user" ? "row-user" : "row-ai"}`}
+                        className={`message-row ${message.role === "user" ? "row-user" : "row-ai"}`}
                       >
                         {message.role === "assistant" && (
-                          <div className="ai-row-avatar">
-                            <span className="avatar-spark">✦</span>
+                          <div className="ai-badge-avatar">
+                            <SparkleIcon />
                           </div>
                         )}
 
-                        <div className={`message-bubble ${message.role === "user" ? "user-bubble" : "ai-bubble"}`}>
+                        <div className={`bento-bubble ${message.role === "user" ? "bubble-user" : "bubble-ai"}`}>
                           {message.role === "user" ? (
-                            <div className="user-text">{message.content}</div>
+                            <div className="user-text-content">{message.content}</div>
                           ) : isWaitingFirstToken ? (
-                            <div className="thinking-bubble">
-                              <span className="dot-wave" />
-                              <span className="dot-wave" />
-                              <span className="dot-wave" />
-                              <span className="thinking-msg">Thinking...</span>
+                            <div className="thinking-row">
+                              <span className="wave-dot" />
+                              <span className="wave-dot" />
+                              <span className="wave-dot" />
+                              <span className="thinking-text">Sumit.ai is synthesizing answer...</span>
                             </div>
                           ) : (
-                            <div className="ai-markdown-content">
+                            <div className="ai-markdown-wrap">
                               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                                 {message.content}
                               </ReactMarkdown>
 
-                              {isStreaming && <span className="stream-caret">▊</span>}
+                              {isStreaming && <span className="streaming-cursor-bar">▋</span>}
 
                               {!isStreaming && message.content && (
-                                <div className="bubble-actions">
+                                <div className="bubble-footer-bar">
                                   <button
-                                    className="copy-action-btn"
+                                    className="copy-btn-minimal"
                                     onClick={() => handleCopy(message.content, index)}
                                     title="Copy response"
                                   >
@@ -786,46 +663,47 @@ function App() {
               )}
             </div>
 
-            {/* Quick Suggestion Chips (when chat has started) */}
+            {/* Quick Suggestion Pills (Available in chat) */}
             {messages.length > 0 && !loading && (
-              <div className="suggestion-chips-bar">
-                {SUGGESTION_CHIPS.map((chip, idx) => (
+              <div className="pills-scroll-row">
+                {SUGGESTION_PILLS.map((pill, i) => (
                   <button
-                    key={idx}
-                    className="chip-suggestion"
-                    onClick={() => sendMessage(chip)}
+                    key={i}
+                    className="suggestion-pill-item"
+                    onClick={() => sendMessage(pill)}
                   >
-                    {chip}
+                    {pill}
                   </button>
                 ))}
               </div>
             )}
 
             {/* Floating Glass Input Bar */}
-            <div className="input-dock-wrapper">
-              <div className="floating-input-card">
+            <div className="bento-input-dock">
+              <div className="dock-card">
                 <textarea
                   ref={textareaRef}
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
-                  placeholder={`Ask about projects, skills, experience, or hire Sumit...`}
+                  placeholder="Ask about projects, technical depth, problem-solving, or hire Sumit..."
                   rows={1}
                   disabled={loading}
-                  className="modern-textarea"
+                  className="bento-textarea"
                 />
 
                 <button
-                  className={`send-action-button ${input.trim() ? "can-send" : ""}`}
+                  className={`dock-send-btn ${input.trim() ? "dock-send-active" : ""}`}
                   onClick={() => sendMessage()}
                   disabled={loading || !input.trim()}
-                  aria-label="Send query"
+                  aria-label="Send message"
+                  title="Send message"
                 >
                   <SendIcon />
                 </button>
               </div>
 
-              <div className="input-subhint">
+              <div className="dock-hint-line">
                 <span>Press <strong>Enter</strong> to send · <strong>Shift + Enter</strong> for new line</span>
               </div>
             </div>
@@ -836,47 +714,42 @@ function App() {
             2. JOB FIT MATCHER MODE
         =================================================== */}
         {mode === "match" && (
-          <div className="matcher-view">
-            <div className="matcher-header-card">
-              <div className="matcher-title-row">
-                <div className="target-badge">
-                  <TargetIcon />
-                </div>
-                <div>
-                  <h2 className="matcher-title">Resume Fit & Requirement Analyzer</h2>
-                  <p className="matcher-subtitle">
-                    Paste any job description to evaluate suitability, detect matched technical requirements, and identify gaps.
-                  </p>
-                </div>
+          <div className="matcher-workspace">
+            <div className="matcher-banner-card">
+              <div className="matcher-icon-circle">
+                <TargetIcon />
+              </div>
+              <div>
+                <h2 className="matcher-heading">Resume Fit & Requirement Screener</h2>
+                <p className="matcher-subheading">
+                  Paste any job description (JD) or list of requirements to calculate candidate suitability, matched skills, and recommendations.
+                </p>
               </div>
             </div>
 
-            <div className="matcher-grid">
-              {/* Left Column: Textarea input */}
-              <div className="matcher-editor-card">
-                <div className="editor-top-row">
-                  <span className="editor-tag">Job Description (JD)</span>
+            <div className="matcher-layout-grid">
+              {/* Left Column: Input Card */}
+              <div className="matcher-card editor-pane">
+                <div className="pane-header">
+                  <span className="pane-title">Job Description / Requirements</span>
                   {jobDescription && (
-                    <button
-                      className="clear-text-btn"
-                      onClick={() => setJobDescription("")}
-                    >
+                    <button className="btn-text-clear" onClick={() => setJobDescription("")}>
                       Clear
                     </button>
                   )}
                 </div>
 
                 <textarea
-                  className="jd-textarea"
+                  className="jd-editor-textarea"
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the job posting requirements, roles, or tech stack here..."
+                  placeholder="Paste the job description, roles, or key skill requirements here..."
                   spellCheck="false"
                 />
 
-                <div className="editor-bottom-bar">
+                <div className="pane-footer">
                   <button
-                    className="run-match-btn"
+                    className="btn-analyze-match"
                     onClick={handleMatchCheck}
                     disabled={matchLoading || !jobDescription.trim()}
                   >
@@ -885,25 +758,25 @@ function App() {
                 </div>
 
                 {matchError && (
-                  <div className="error-alert">
+                  <div className="error-badge-box">
                     <span>⚠ {matchError}</span>
                   </div>
                 )}
               </div>
 
-              {/* Right Column: Results */}
-              <div className="matcher-results-column">
+              {/* Right Column: Scorecard & Breakdown */}
+              <div className="matcher-card results-pane">
                 {matchResult ? (
-                  <div className="match-card">
+                  <div className="results-wrapper">
                     {/* Score Bar */}
-                    <div className="score-hero">
-                      <div className="score-number-wrap">
-                        <span className="score-big">{matchResult.suitability_score}%</span>
-                        <span className="score-desc">Compatibility Score</span>
+                    <div className="scorecard-top">
+                      <div className="scorecard-row">
+                        <span className="scorecard-label">Suitability Rating</span>
+                        <span className="scorecard-big">{matchResult.suitability_score}%</span>
                       </div>
-                      <div className="score-track-bar">
+                      <div className="scorecard-track">
                         <div
-                          className="score-fill-bar"
+                          className="scorecard-fill"
                           style={{
                             width: `${Math.min(100, Math.round(matchResult.suitability_score))}%`,
                             background:
@@ -918,46 +791,46 @@ function App() {
                     </div>
 
                     {/* Recommendation */}
-                    <div className="recommendation-box">
-                      <span className="micro-tag">Recommendation</span>
-                      <p className="rec-text">{matchResult.recommendation}</p>
+                    <div className="insight-card rec-card">
+                      <span className="kicker-tag">Recommendation</span>
+                      <p className="rec-body">{matchResult.recommendation}</p>
                     </div>
 
-                    {/* Matched vs Missing */}
-                    <div className="skills-compare-row">
-                      <div className="compare-card matches-card">
-                        <h5 className="compare-head">✓ Matched Skills ({matchResult.matched_skills?.length || 0})</h5>
-                        <div className="pill-container">
-                          {(matchResult.matched_skills || []).map((skill, i) => (
-                            <span key={i} className="chip match-chip">{skill}</span>
+                    {/* Skills Breakdown */}
+                    <div className="skills-split-row">
+                      <div className="skill-bucket bucket-match">
+                        <h5 className="bucket-title">✓ Matched Skills ({matchResult.matched_skills?.length || 0})</h5>
+                        <div className="bucket-pills">
+                          {(matchResult.matched_skills || []).map((s, i) => (
+                            <span key={i} className="chip-pill pill-green">{s}</span>
                           ))}
                         </div>
                       </div>
 
-                      <div className="compare-card gaps-card">
-                        <h5 className="compare-head">− Skill Gaps ({matchResult.missing_skills?.length || 0})</h5>
-                        <div className="pill-container">
-                          {(matchResult.missing_skills || []).map((skill, i) => (
-                            <span key={i} className="chip gap-chip">{skill}</span>
+                      <div className="skill-bucket bucket-gap">
+                        <h5 className="bucket-title">− Skill Gaps ({matchResult.missing_skills?.length || 0})</h5>
+                        <div className="bucket-pills">
+                          {(matchResult.missing_skills || []).map((s, i) => (
+                            <span key={i} className="chip-pill pill-red">{s}</span>
                           ))}
                         </div>
                       </div>
                     </div>
 
                     {/* Strengths & Considerations */}
-                    <div className="bullet-insights-row">
-                      <div className="insight-card">
-                        <h5 className="insight-head">Candidate Strengths</h5>
-                        <ul className="insight-list">
+                    <div className="points-split-row">
+                      <div className="point-card">
+                        <h5 className="point-title">Candidate Strengths</h5>
+                        <ul className="point-list">
                           {(matchResult.candidate_strengths || []).map((item, i) => (
                             <li key={i}>{item}</li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="insight-card">
-                        <h5 className="insight-head">Considerations</h5>
-                        <ul className="insight-list">
+                      <div className="point-card">
+                        <h5 className="point-title">Considerations</h5>
+                        <ul className="point-list">
                           {(matchResult.candidate_gaps || []).map((item, i) => (
                             <li key={i}>{item}</li>
                           ))}
@@ -965,18 +838,18 @@ function App() {
                       </div>
                     </div>
 
-                    {/* Reasoning */}
-                    <div className="reasoning-box">
-                      <span className="micro-tag">Detailed Fit Rationale</span>
-                      <p className="reason-text">{matchResult.explanation}</p>
+                    {/* Detailed Rationale */}
+                    <div className="insight-card">
+                      <span className="kicker-tag">Detailed Fit Rationale</span>
+                      <p className="rec-body">{matchResult.explanation}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="matcher-empty-card">
-                    <span className="empty-badge">Target AI Screener</span>
-                    <h3 className="empty-title">Instant Role Fit Analysis</h3>
-                    <p className="empty-desc">
-                      Paste any Job Description on the left and click <strong>Run AI Match Analysis</strong>. The engine will match Sumit's technical proficiencies, education at NIT Jamshedpur, and projects to compute an objective score.
+                  <div className="results-idle">
+                    <span className="idle-pill">AI Evaluator</span>
+                    <h3 className="idle-heading">How the Fit Analyzer Works</h3>
+                    <p className="idle-text">
+                      Paste a Job Description on the left and run analysis. The system parses requirements against Sumit's actual coursework at NIT Jamshedpur, verified projects, and full-stack technical competencies to deliver an objective compatibility report.
                     </p>
                   </div>
                 )}
