@@ -1,366 +1,269 @@
-# 🤖 Personal AI ChatBot
+# 🤖 Sumit Kumar — AI Portfolio & Career Representative
 
-An AI-powered personal portfolio chatbot that allows recruiters and visitors to interact with my professional profile through natural language.
+[![Live Frontend](https://img.shields.io/badge/Live-Vercel-black?style=flat&logo=vercel)](https://personal-chat-bot-psi.vercel.app)
+[![Live Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat&logo=render)](https://personal-chatbot-backend-jsnx.onrender.com)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React_19-20232A?style=flat&logo=react&logoColor=61DAFB)](https://react.dev)
+[![Groq](https://img.shields.io/badge/Groq_API-f55036?style=flat)](https://groq.com)
+[![Google Gemini](https://img.shields.io/badge/Google_Gemini-4285F4?style=flat&logo=google)](https://deepmind.google/technologies/gemini/)
 
-Instead of manually browsing through a resume, users can simply ask questions such as:
+An autonomous, full-stack AI career platform representing **Sumit Kumar** (MCA candidate at **National Institute of Technology, Jamshedpur**).
 
-* What projects has Sumit built?
-* Tell me about his education.
-* What are his technical skills?
-* What is his internship experience?
-* What are his career goals?
-* What are his strengths?
-* Why should we hire him?
-* Is Sumit suitable for an AI Engineer role?
+Instead of sifting through static PDFs, recruiters and hiring managers can query technical coursework, algorithmic problem solving, flagship engineering projects, and internship experience via natural dialogue — in English or Hindi/Hinglish — or run an automated **Job Description Fit Analysis (`/match`)** to benchmark role suitability.
 
-The chatbot uses an LLM to understand the user's question and generate a natural-language response based on my professional profile.
+---
 
-## 🚀 Live Demo
+## 🚀 Live Deployments
 
-**Frontend:**
-https://personal-chat-bot-psi.vercel.app
+* **Interactive Frontend:** [https://personal-chat-bot-psi.vercel.app](https://personal-chat-bot-psi.vercel.app)
+* **Backend API Base:** [https://personal-chatbot-backend-jsnx.onrender.com](https://personal-chatbot-backend-jsnx.onrender.com)
+* **Interactive API Docs (Swagger):** [https://personal-chatbot-backend-jsnx.onrender.com/docs](https://personal-chatbot-backend-jsnx.onrender.com/docs)
+* **Health Check:** [https://personal-chatbot-backend-jsnx.onrender.com/health](https://personal-chatbot-backend-jsnx.onrender.com/health)
 
-**Backend API:**
-https://personal-chatbot-backend-bam4.onrender.com
+---
 
-**API Documentation:**
-https://personal-chatbot-backend-bam4.onrender.com/docs
+## ✨ Key Capabilities & Highlights
 
-## ✨ Features
+* **Multi-Provider AI Failover Engine:**
+  - **Tier 1:** High-speed inference using Groq `llama-3.3-70b-versatile`.
+  - **Tier 2:** Low-latency fallback on Groq `llama-3.1-8b-instant`.
+  - **Tier 3:** Zero-downtime automated failover to Google Gemini (`gemini-3.5-flash`) via streaming SSE when rate limits are approached.
+* **Job Description Fit Analyzer (`/match`):**
+  - Evaluates uploaded/pasted Job Descriptions against verified candidate competencies.
+  - Generates objective suitability scores (0–100%), matched skills, gap identification, candidate strengths, and a dynamically tailored resume preview.
+* **Authenticity & Security Guardrails:**
+  - Prompt injection protection prevents jailbreaks or persona tampering.
+  - Grounded factual integrity: strictly responds from candidate's verified coursework, projects, and internship.
+  - Sanitized public profile endpoint (`/profile`) masking private contact info against web scrapers.
+  - In-memory sliding-window IP rate limiting preventing token depletion.
+* **Bilingual & Conversational Intelligence:**
+  - Understands and dynamically replies in the user's language — seamlessly switches between English and natural Hindi/Hinglish.
+* **Terminal & Code-Editor UI:**
+  - JetBrains Mono terminal aesthetic with dark/light themes, custom cyber "S" SVG brand mark, interactive luminous particle background, and real-time streaming tokens.
+* **Full Mobile & Tablet Responsiveness:**
+  - Horizontal swipeable starter chips on mobile, no-auto-zoom iOS input handling (`16px`), and touch-optimized action buttons.
 
-* 💬 AI-powered conversational interface
-* 👨‍💻 Personal profile-based responses
-* 🎓 Education and academic information
-* 🛠️ Technical skills
-* 🚀 Project information
-* 💼 Internship and professional experience
-* 🤝 Soft skills and professional preferences
-* 🎯 Short-term and long-term career goals
-* 🤖 AI/ML experience
-* 📊 Role and eligibility-related questions
-* 🔗 GitHub and LinkedIn information
-* 📱 Responsive chat interface
-* ⚡ FastAPI backend
-* 🔐 API key stored securely using environment variables
-
-## 🧠 How It Works
-
-The application follows a simple client-server architecture:
-
-```text
-                    User
-                      │
-                      ▼
-              React Frontend
-                      │
-                      │ POST /chat
-                      ▼
-              FastAPI Backend
-                      │
-                      ▼
-             Profile Information
-                      │
-                      ▼
-                 LLM / Groq
-                      │
-                      ▼
-              Generated Response
-                      │
-                      ▼
-              React Chat UI
-```
-
-### Request Flow
-
-1. User enters a question in the chat interface.
-2. React sends the question to the FastAPI backend.
-3. FastAPI receives the request through the `/chat` endpoint.
-4. The backend provides the relevant profile context to the LLM.
-5. The LLM generates a natural-language response.
-6. The response is returned to the React frontend.
-7. The frontend displays the answer in the chat interface.
+---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+* **Framework:** React 19, Vite 8, JavaScript (ES6+)
+* **Styling & Effects:** Custom Modern CSS, CSS Variables, Theme Tokens, Canvas 2D Interactive Particle Background
+* **Markdown Engine:** `react-markdown`, `remark-gfm` (custom secure external tab renderers)
+* **Hosting:** Vercel Global Edge Network
 
-* React
-* JavaScript
-* Vite
-* Tailwind CSS
-* HTML/CSS
+### Backend & AI
+* **Framework:** FastAPI, Uvicorn, Python 3
+* **Validation & Schemas:** Pydantic v2
+* **LLM Orchestration:** Groq SDK, Google Gemini REST API (HTTPX SSE Streaming)
+* **Deployment & Proxy:** Render Linux Web Service, Gunicorn/Uvicorn, `X-Accel-Buffering: no` unbuffered SSE proxy streaming
 
-### Backend
+---
 
-* Python
-* FastAPI
-* Uvicorn
-* Pydantic
-
-### AI
-
-* Large Language Model (LLM)
-* Groq API
-* Prompt-based profile grounding
-
-### Deployment
-
-* Vercel — Frontend
-* Render — Backend
-* GitHub — Source Code & Version Control
-
-## 📁 Project Structure
+## 🏗️ Architecture & Data Flow
 
 ```text
-Personal-ChatBot/
-│
-├── backend/
-│   ├── main.py
-│   ├── requirements.txt
-│   └── .env
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── components/
-│   │   └── ...
-│   ├── package.json
-│   └── vite.config.js
-│
-├── .gitignore
-└── README.md
+ ┌────────────────────────────────────────────────────────┐
+ │                   Visitor / Recruiter                  │
+ └───────────────────────────┬────────────────────────────┘
+                             │
+                             ▼
+ ┌────────────────────────────────────────────────────────┐
+ │               React 19 Frontend (Vercel)              │
+ │  - Terminal Shell      - Light/Dark Mode Toggle        │
+ │  - Real-time Stream    - Mobile Swipeable File Chips   │
+ └─────────────┬────────────────────────────┬─────────────┘
+               │ POST /chat (Streaming SSE) │ POST /match (JSON)
+               ▼                            ▼
+ ┌────────────────────────────────────────────────────────┐
+ │                FastAPI Backend (Render)                │
+ │  - Rate Limiter        - Prompt Guardrails             │
+ │  - candidate.json      - Regex CORS Middleware         │
+ └─────────────┬────────────────────────────┬─────────────┘
+               │                            │
+      [Tier 1 & Tier 2]            [Tier 3 Automated Backup]
+               ▼                            ▼
+ ┌───────────────────────────┐    ┌───────────────────────┐
+ │         Groq Cloud        │    │     Google Gemini     │
+ │  - llama-3.3-70b          │───▶│  - gemini-3.5-flash   │
+ │  - llama-3.1-8b (Fallback)│    │  - Streaming HTTPX    │
+ └───────────────────────────┘    └───────────────────────┘
 ```
 
-## 🔌 API
+---
 
-### POST `/chat`
+## 🔌 API Reference
 
-Used to send a user question to the AI chatbot.
+### 1. `POST /chat`
+Real-time token-streamed response regarding candidate background.
 
-Example request:
-
+**Request Payload:**
 ```json
 {
-  "message": "What projects has Sumit built?"
+  "question": "What is Sumit's experience with Docker and Linux?",
+  "history": [
+    { "role": "user", "content": "Hi!" },
+    { "role": "assistant", "content": "Hello! How can I help you explore Sumit's profile?" }
+  ]
 }
 ```
 
-Example response:
+**Response:**
+* Streams chunks of `text/plain; charset=utf-8` using Server-Sent Events.
 
+---
+
+### 2. `POST /match`
+Evaluates job description compatibility and outputs structured fit analysis.
+
+**Request Payload:**
 ```json
 {
-  "response": "Sumit has built three major projects: Draw.Together, Movie Recommender App, and AI Resume Matcher..."
+  "job_description": "We are seeking a Full-Stack Developer proficient in React, Node.js, and MongoDB..."
 }
 ```
 
-### GET `/`
-
-Used to check whether the backend is running.
-
-Response:
-
+**Response:**
 ```json
 {
-  "message": "AI Resume Portfolio API is running!"
+  "suitability_score": 88.0,
+  "matched_skills": ["React", "Node.js", "Express.js", "MongoDB", "Tailwind CSS"],
+  "missing_skills": ["Docker in Production"],
+  "candidate_strengths": ["Strong foundational full-stack projects", "NIT Jamshedpur MCA academic rigor"],
+  "candidate_gaps": ["Active learner currently mastering containerized deployment"],
+  "recommendation": "Strong candidate for full-stack web development roles.",
+  "explanation": "Sumit possesses verified hands-on experience in React and Node.js with production internship delivery.",
+  "tailored_resume": {
+    "headline": "Full-Stack Web Developer",
+    "summary": "Full-stack developer with hands-on experience in React, Node.js, Express, and MongoDB.",
+    "highlighted_skills": ["React", "Node.js", "Express.js", "MongoDB", "C++"],
+    "recommended_project_ids": ["online-book-store", "ai-database-query-assistant"],
+    "relevance_highlights": ["Built responsive full-stack applications with JWT authentication and REST APIs."]
+  }
 }
 ```
 
-## ⚙️ Environment Variables
+---
 
-### Backend
+### 3. `GET /profile`
+Returns sanitized public candidate profile with masked phone numbers to protect against scrapers.
 
-Create a `.env` file inside the backend directory:
+---
 
+### 4. `GET /health`
+Returns JSON status checking service uptime:
+```json
+{
+  "status": "healthy",
+  "candidate": "Sumit Kumar",
+  "education": "M.C.A — NIT Jamshedpur",
+  "message": "Sumit Kumar Career & AI Resume API is running!"
+}
+```
+
+---
+
+## 💻 Local Development Setup
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/sumit9596/Personal-ChatBot.git
+cd Personal-ChatBot
+```
+
+### 2. Configure Backend
+```bash
+cd backend
+python -m venv .venv
+
+# Activate Virtual Environment:
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies:
+pip install -r requirements.txt
+```
+
+Create a `.env` file in the `backend/` directory:
 ```env
-GROQ_API_KEY=your_groq_api_key
+GROQ_API_KEY=your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-3.5-flash
+ALLOW_ALL_ORIGINS=true
 ```
 
-### Frontend
+Run FastAPI backend:
+```bash
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+Backend will be live at `http://127.0.0.1:8000`.
 
-For local development:
+---
 
+### 3. Configure Frontend
+Open a new terminal window:
+```bash
+cd frontend
+npm install
+```
+
+Create a `.env.local` file in `frontend/`:
 ```env
 VITE_API_URL=http://127.0.0.1:8000
 ```
 
-For production:
-
-```env
-VITE_API_URL=https://personal-chatbot-backend-bam4.onrender.com
-```
-
-The frontend uses `VITE_API_URL` to communicate with the deployed FastAPI backend.
-
-## 💻 Local Setup
-
-### 1. Clone the repository
-
+Start the Vite development server:
 ```bash
-git clone https://github.com/sumit9596/Personal-ChatBot.git
-
-cd Personal-ChatBot
-```
-
-### 2. Setup Backend
-
-```bash
-cd backend
-
-python -m venv .venv
-```
-
-Activate the virtual environment on Windows:
-
-```bash
-.venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Run the backend:
-
-```bash
-python -m uvicorn main:app --reload
-```
-
-Backend will run at:
-
-```text
-http://127.0.0.1:8000
-```
-
-### 3. Setup Frontend
-
-Open another terminal:
-
-```bash
-cd frontend
-npm install
 npm run dev
 ```
-
-Frontend will run at:
-
-```text
-http://localhost:5173
-```
-
-## 🎯 Example Questions
-
-The chatbot can answer questions related to my professional profile.
-
-### About Me
-
-```text
-Tell me about Sumit.
-Who is Sumit?
-Give me a brief introduction.
-```
-
-### Education
-
-```text
-Where did Sumit study?
-What is his degree?
-What is his CGPA?
-```
-
-### Projects
-
-```text
-What projects has Sumit built?
-Tell me about the AI Resume Matcher.
-Explain Draw.Together.
-What technologies did he use?
-```
-
-### Experience
-
-```text
-Tell me about his internship.
-Where did Sumit work?
-What did he do during his internship?
-```
-
-### Skills
-
-```text
-What are Sumit's technical skills?
-What programming languages does he know?
-Does he know React?
-Does he have AI/ML experience?
-```
-
-### HR / Behavioral Questions
-
-```text
-What are Sumit's strengths?
-What are his weaknesses?
-What is his short-term goal?
-What is his long-term goal?
-Why should we hire Sumit?
-How does he work in a team?
-How does he handle challenges?
-What kind of work environment does he prefer?
-How does he approach learning new technologies?
-```
-
-## 🧩 Key Learning
-
-This project helped me understand:
-
-* Building REST APIs with FastAPI
-* Connecting React with a Python backend
-* Working with LLM APIs
-* Prompt engineering
-* Structuring profile information for AI responses
-* Environment variable management
-* API integration
-* CORS and frontend-backend communication
-* Production deployment
-* Deploying frontend on Vercel
-* Deploying backend on Render
-* Git and GitHub workflow
-
-## 🔮 Future Improvements
-
-Some planned improvements include:
-
-* Resume upload functionality
-* Semantic search using embeddings
-* Vector database integration
-* Retrieval-Augmented Generation (RAG)
-* Conversation memory
-* Better response formatting
-* Role-specific candidate matching
-* Resume-job description matching
-* Authentication and admin dashboard
-* Analytics for frequently asked recruiter questions
-
-## 👨‍💻 About Me
-
-**Sumit Kumar**
-M.C.A — National Institute of Technology Jamshedpur
-
-Interested in:
-
-* Artificial Intelligence
-* Machine Learning
-* LLM Applications
-* Full Stack Development
-
-### Connect With Me
-
-**GitHub:**
-https://github.com/sumit9596
-
-**LinkedIn:**
-https://linkedin.com/in/sumit9596/
+Frontend will be live at `http://localhost:5173`.
 
 ---
 
-⭐ If you find this project interesting, feel free to explore the repository and connect with me.
+## 📂 Project Structure
+
+```text
+Personal-ChatBot/
+├── .gitignore                      # Top-level security ignore rule
+├── README.md                       # Comprehensive project documentation
+│
+├── backend/
+│   ├── .env.example                # Backend environment template
+│   ├── candidate.json              # Verified knowledge base & role competencies
+│   ├── main.py                     # FastAPI server, AI failover & endpoints
+│   └── requirements.txt            # Python dependencies (UTF-8 standard)
+│
+└── frontend/
+    ├── .env.example                # Frontend environment template
+    ├── index.html                  # HTML entry point, SEO metadata & favicon
+    ├── package.json                # React 19 & Vite dependencies
+    ├── vite.config.js              # Vite configuration
+    ├── public/
+    │   ├── favicon.svg             # Cyber 'S' neon mark
+    │   └── resume.pdf              # Candidate resume document
+    └── src/
+        ├── App.css                 # Terminal styles & tablet/mobile responsive system
+        ├── App.jsx                 # Main React component, chat & match views
+        ├── index.css               # Global reset
+        ├── main.jsx                # React root mount
+        └── components/
+            └── InteractiveBackground.jsx # Luminous canvas tech particle effect
+```
+
+---
+
+## 👨‍💻 About Sumit Kumar
+
+* **Education:** Master of Computer Applications (M.C.A.) — **National Institute of Technology, Jamshedpur** (2024 – 2027)
+* **Undergraduate:** Bachelor of Computer Applications (B.C.A.) — RLSY College, Aurangabad (8.50 CGPA)
+* **Core Competencies:** Data Structures & Algorithms (C++), Full-Stack Web Development (React, Node.js, Express, MongoDB), AI/LLM Applications, DBMS, Operating Systems.
+* **Problem Solving:** 300+ problems solved across LeetCode, GeeksforGeeks, and HackerRank (5★ Gold Badge in Problem Solving, C++, Java, SQL).
+
+### Connect With Me
+* **GitHub:** [@sumit9596](https://github.com/sumit9596)
+* **LinkedIn:** [linkedin.com/in/sumit9596](https://linkedin.com/in/sumit9596/)
+* **Email:** [officialsumit9596@gmail.com](mailto:officialsumit9596@gmail.com)
