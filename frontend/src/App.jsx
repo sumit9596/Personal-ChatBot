@@ -1,289 +1,253 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import InteractiveBackground from "./components/InteractiveBackground";
 import "./App.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
+const RAW_API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL = RAW_API_URL.replace(/\/+$/, "");
 
 // =========================================================
-// CANDIDATE & BENTO CONTENT DATA
+// EDIT ME — candidate config
 // =========================================================
 
 const CANDIDATE = {
   name: "Sumit Kumar",
-  role: "Full-Stack Developer & AI Engineer",
-  education: "NIT Jamshedpur (MCA)",
-  location: "India",
-  status: "Open to Opportunities",
+  role: "AI & Full-Stack Dev",
 };
 
-const BENTO_PROJECTS = [
-  {
-    title: "AI Resume Matcher",
-    tag: "AI/ML & NLP",
-    desc: "Extracts resume data using PyMuPDF, matches requirements via NLP & cosine similarity.",
-    color: "#8b5cf6",
-    prompt: "Tell me all about your AI Resume Matcher project: architecture, tech stack, and how cosine similarity is used.",
-  },
-  {
-    title: "Draw.Together",
-    tag: "Full-Stack & WebSockets",
-    desc: "Real-time collaborative whiteboard and canvas editor with multi-user sync & JWT auth.",
-    color: "#06b6d4",
-    prompt: "Explain the Draw.Together collaborative canvas project and how real-time sync works.",
-  },
-  {
-    title: "Online Book Store",
-    tag: "MERN Stack",
-    desc: "E-commerce platform with JWT authentication, shopping cart, and admin inventory CRUD.",
-    color: "#ec4899",
-    prompt: "Describe your Online Book Store project, authentication model, and database design.",
-  },
-  {
-    title: "Movie Recommender",
-    tag: "ML & Streamlit",
-    desc: "Content-based recommendation engine powered by TMDB API and cosine similarity.",
-    color: "#f59e0b",
-    prompt: "How does your Movie Recommender application calculate movie similarities?",
-  },
+const CANDIDATE_JSON = [
+  { key: "degree", value: "MCA (NIT Jamshedpur)" },
+  { key: "focus", value: "AI/LLM & Full-Stack" },
+  { key: "core_cs", value: "DSA, OOPs, DBMS, OS" },
+  { key: "languages", value: "C++, Python, JS, Java" },
+  { key: "web", value: "React, Node, Express" },
+  { key: "database", value: "MongoDB, MySQL, SQL" },
+  { key: "devops", value: "Docker (Basics), Linux" },
+  { key: "dsa_stats", value: "300+ (5★ HackerRank)" },
+  { key: "location", value: "India" },
 ];
 
-const TECH_BADGES = [
-  { name: "Python", cat: "ai" },
-  { name: "FastAPI", cat: "backend" },
-  { name: "React.js", cat: "frontend" },
-  { name: "Node.js", cat: "backend" },
-  { name: "C++ (DSA)", cat: "core" },
-  { name: "PyMuPDF", cat: "ai" },
-  { name: "Cosine Matcher", cat: "ai" },
-  { name: "MongoDB", cat: "backend" },
-  { name: "Tailwind CSS", cat: "frontend" },
-  { name: "Streamlit", cat: "ai" },
+const STARTER_FILES = [
+  { name: "projects.md", type: "md", prompt: "What projects has Sumit built?" },
+  { name: "sql_assistant.py", type: "json", prompt: "Tell me about Sumit's AI Database Query Assistant (Text-to-SQL) project" },
+  { name: "skills.json", type: "json", prompt: "What are his technical skills (Core CS, Docker, Linux, C++)?" },
+  { name: "education.md", type: "md", prompt: "Tell me about Sumit's education and achievements" },
+  { name: "experience.log", type: "log", prompt: "Tell me about his frontend internship at Shikom Solutions" },
 ];
 
-const SUGGESTION_PILLS = [
-  "What is Sumit's educational background?",
-  "Tell me about his internship at Shikom",
-  "How does he handle DSA problem solving?",
-  "What are his core strengths in Full-Stack?",
+const CHECKLIST_ITEMS = [
+  "Skills",
+  "Experience",
+  "Projects",
+  "Requirements",
+  "Gaps",
+  "Overall fit",
 ];
+
 
 // =========================================================
-// SVG ICONS
+// ICONS
 // =========================================================
 
-function SparkleIcon() {
+
+function GithubIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+    </svg>
+  );
+}
+
+function LinkedinIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+      <rect x="2" y="9" width="4" height="12" />
+      <circle cx="4" cy="4" r="2" />
     </svg>
   );
 }
 
 function CopyIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+      <rect x="5" y="5" width="8.5" height="8.5" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M3.5 10.5H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h6.5a1 1 0 0 1 1 1v0.5" stroke="currentColor" strokeWidth="1.3" />
     </svg>
   );
 }
 
 function CheckIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+      <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function SendIcon() {
+function SendArrowIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+  );
+}
+
+function RestartIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path
+        d="M13.5 8A5.5 5.5 0 1 1 11.9 4.1M13.5 2.5v3.5H10"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function SunIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="5" />
-      <line x1="12" y1="1" x2="12" y2="3" />
-      <line x1="12" y1="21" x2="12" y2="23" />
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-      <line x1="1" y1="12" x2="3" y2="12" />
-      <line x1="21" y1="12" x2="23" y2="12" />
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.4" />
+      <path
+        d="M8 1.5v1.6M8 12.9v1.6M14.5 8h-1.6M3.1 8H1.5M12.4 3.6l-1.1 1.1M4.7 11.3l-1.1 1.1M12.4 12.4l-1.1-1.1M4.7 4.7 3.6 3.6"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
 function MoonIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+      <path
+        d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function ExternalIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
-
-function GridIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" />
-      <rect x="14" y="3" width="7" height="7" />
-      <rect x="14" y="14" width="7" height="7" />
-      <rect x="3" y="14" width="7" height="7" />
-    </svg>
-  );
-}
-
-function TargetIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
-  );
-}
-
-function ChatIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-    </svg>
-  );
-}
 
 // =========================================================
-// MAIN APP COMPONENT
+// SCORE → status mapping (git-CI style verdicts)
+// =========================================================
+
+function scoreMeta(score) {
+  const value = Math.max(0, Math.min(100, Math.round(score || 0)));
+
+  if (value >= 75) {
+    return { value, tag: "PASS", text: "Strong match", colorVar: "--mint" };
+  }
+  if (value >= 50) {
+    return { value, tag: "REVIEW", text: "Partial match", colorVar: "--amber" };
+  }
+  return { value, tag: "GAP", text: "Limited match", colorVar: "--rose" };
+}
+
+
+// =========================================================
+// MAIN APP
 // =========================================================
 
 function App() {
-  // Chat State
+
+  // --- chat state ---
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState(() => {
-    try {
-      const saved = localStorage.getItem("chat_messages");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState(null);
 
-  // Mode: "chat" | "match"
-  const [mode, setMode] = useState("chat");
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "dark");
+  // Clear any legacy stored chat on load so refresh always starts fresh
+  useEffect(() => {
+    try {
+      localStorage.removeItem("sumit_portfolio_chat_v1");
+      localStorage.removeItem("chat_messages");
+    } catch {
+      // Ignore
+    }
+  }, []);
 
-  // Job Match State
+  function handleCopy(text, index) {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  }
+
+  // --- mode state ---
+  const [mode, setMode] = useState("chat");
   const [jobDescription, setJobDescription] = useState("");
   const [matchResult, setMatchResult] = useState(null);
   const [matchLoading, setMatchLoading] = useState(false);
   const [matchError, setMatchError] = useState("");
 
   const scrollRef = useRef(null);
-  const textareaRef = useRef(null);
+  const gutterRef = useRef(null);
 
-  // Sync theme
+  // --- theme (light / dark) ---
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem("theme") || "dark"
+  );
+
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // Sync chat messages to localStorage
-  useEffect(() => {
-    try {
-      if (messages.length > 0) {
-        localStorage.setItem("chat_messages", JSON.stringify(messages));
-      }
-    } catch {
-      // Ignore
-    }
-  }, [messages]);
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
 
-  // Auto scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
-  const toggleTheme = () => {
-    setTheme((c) => (c === "dark" ? "light" : "dark"));
-  };
-
-  const handleCopy = (text, index) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
-  };
-
-  const handleResetChat = () => {
-    setMessages([]);
-    setInput("");
-    try {
-      localStorage.removeItem("chat_messages");
-    } catch {
-      // Ignore
-    }
-  };
-
-  const handleInputChange = (e) => {
-    setInput(e.target.value);
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 130)}px`;
-    }
-  };
 
   // =========================================================
-  // SEND MESSAGE
+  // SEND CHAT MESSAGE
   // =========================================================
 
-  const sendMessage = useCallback(async (overrideText) => {
+  async function sendMessage(overrideText) {
+
     const text = (overrideText ?? input).trim();
     if (!text || loading) return;
 
     const userMessage = { role: "user", content: text };
-    setInput("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
 
+    setInput("");
+
+    // Prior messages before adding current user message (fixes duplication bug)
     const priorHistory = messages;
     setMessages([...priorHistory, userMessage]);
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: userMessage.content,
-          history: priorHistory,
-        }),
-      });
+
+      const response = await fetch(
+        `${API_URL}/chat`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: userMessage.content,
+            history: priorHistory.slice(-12),
+          }),
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error("Rate limit reached. Please wait a moment before sending another message.");
+          throw new Error("Rate limit exceeded. Please wait a moment before sending another message.");
         }
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.detail || `Server error: ${response.status}`);
@@ -297,6 +261,7 @@ function App() {
 
       let chunkCount = 0;
       while (true) {
+
         const { value, done } = await reader.read();
         if (done) break;
 
@@ -304,6 +269,7 @@ function App() {
         streamedAnswer += chunk;
         chunkCount += 1;
 
+        // Throttle UI re-renders every 3 chunks to eliminate DOM stutter on mobile
         if (chunkCount % 3 === 0) {
           const currentText = streamedAnswer;
           setMessages((prev) => {
@@ -313,8 +279,10 @@ function App() {
             return updated;
           });
         }
+
       }
 
+      // Final commit ensuring 100% of streamed tokens are rendered
       const finalText = streamedAnswer;
       setMessages((prev) => {
         const updated = [...prev];
@@ -322,33 +290,56 @@ function App() {
         updated[lastIndex] = { ...updated[lastIndex], content: finalText };
         return updated;
       });
+
     } catch (error) {
+
       console.error("Chat error:", error);
       const errorMessage = error.message?.includes("Rate limit")
-        ? "⚠️ Rate limit reached. Please wait a few moments before sending another message."
-        : "Sorry, I encountered an issue generating the response. Please try again.";
+        ? "⚠️ Rate limit reached. Please wait a few seconds before asking your next question."
+        : "Sorry, something went wrong while generating the response. Please try again.";
 
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: errorMessage },
       ]);
-    } finally {
-      setLoading(false);
-    }
-  }, [input, loading, messages]);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+    } finally {
+
+      setLoading(false);
+
+    }
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       sendMessage();
     }
-  };
+  }
+
+  function handleStarterPrompt(prompt) {
+    if (loading) return;
+    sendMessage(prompt);
+  }
+
+  function handleNewChat() {
+    setMessages([]);
+    setInput("");
+    try {
+      localStorage.removeItem("sumit_portfolio_chat_v1");
+      localStorage.removeItem("chat_messages");
+    } catch {
+      // Ignore
+    }
+  }
+
 
   // =========================================================
-  // JOB MATCHING
+  // JOB DESCRIPTION MATCHING
   // =========================================================
 
-  const handleMatchCheck = async () => {
+  async function checkJobMatch() {
+
     if (!jobDescription.trim()) return;
 
     setMatchLoading(true);
@@ -356,300 +347,360 @@ function App() {
     setMatchError("");
 
     try {
-      const response = await fetch(`${API_URL}/match`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ job_description: jobDescription }),
-      });
+
+      const response = await fetch(
+        `${API_URL}/match`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ job_description: jobDescription }),
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new Error("Rate limit exceeded. Please wait a moment before trying again.");
+          throw new Error("Rate limit exceeded. Please wait a moment before running fit analysis again.");
         }
-        const err = await response.json().catch(() => ({}));
-        throw new Error(err.detail || `Server error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Match API error: ${response.status}`);
       }
 
       const data = await response.json();
       setMatchResult(data);
+
     } catch (error) {
-      console.error("Match error:", error);
-      setMatchError(error.message || "Job analysis failed. Please verify the backend is running.");
+
+      console.error("Job matching error:", error);
+      setMatchError(error.message || "Job matching failed. Please verify that the backend server is running.");
+
     } finally {
+
       setMatchLoading(false);
+
     }
-  };
+  }
+
+  function handleJdScroll(event) {
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = event.target.scrollTop;
+    }
+  }
+
+  const lineCount = Math.max(jobDescription.split("\n").length + 1, 14);
+  const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1);
+
+  const meta = matchResult ? scoreMeta(matchResult.suitability_score) : null;
+
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
-    <div className="bento-app">
-      {/* Dynamic Animated Colorful Aurora Gradient Mesh in Background */}
-      <div className="bento-ambient-mesh" aria-hidden="true">
-        <div className="aurora-blob blob-violet" />
-        <div className="aurora-blob blob-cyan" />
-        <div className="aurora-blob blob-rose" />
-        <div className="aurora-blob blob-amber" />
-        <div className="ambient-grid-overlay" />
-      </div>
+
+    <div className="app">
+      <InteractiveBackground theme={theme} />
 
       {/* =====================================================
-          TOP NAVIGATION BAR
+          WINDOW CHROME
       ===================================================== */}
-      <header className="bento-navbar">
-        <div className="navbar-inner">
-          {/* Brand Left */}
-          <div className="nav-brand-group" onClick={() => { setMode("chat"); handleResetChat(); }}>
-            <div className="brand-logo-pill">
-              <span className="logo-sparkle">✦</span>
-              <span className="logo-text">Sumit<span className="logo-ai">.ai</span></span>
-            </div>
-            <span className="live-status-pill">
-              <span className="status-blip" />
-              NIT Jamshedpur MCA
-            </span>
+
+      <div className="window-chrome">
+
+        <div className="chrome-dots">
+          <span className="dot dot--rose" />
+          <span className="dot dot--amber" />
+          <span className="dot dot--mint" />
+        </div>
+
+        <div className="chrome-title">sumit — ai-assistant</div>
+
+        <div className="chrome-right">
+          <a
+            href="https://github.com/sumit9596"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chrome-link-btn"
+            title="Sumit's GitHub Profile (Opens in new tab)"
+            aria-label="GitHub Profile"
+          >
+            <GithubIcon />
+          </a>
+
+          <a
+            href="https://linkedin.com/in/sumit9596/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chrome-link-btn"
+            title="Sumit's LinkedIn Profile (Opens in new tab)"
+            aria-label="LinkedIn Profile"
+          >
+            <LinkedinIcon />
+          </a>
+
+          <button
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label="Toggle light and dark mode"
+          >
+            {theme === "dark" ? <MoonIcon /> : <SunIcon />}
+          </button>
+
+          <div className="chrome-status">
+            <span className="status-dot" />
+            <span className="status-text">live</span>
+          </div>
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          WORKSPACE
+      ===================================================== */}
+
+      <div className="workspace">
+
+
+        {/* =================================================
+            SIDEBAR — file explorer
+        ================================================= */}
+
+        <aside className="sidebar">
+
+          <p className="sidebar-label">Explorer</p>
+
+          <div className="file-tree">
+
+            <p className="tree-folder">profile</p>
+
+            {STARTER_FILES.map((file) => (
+              <button
+                key={file.name}
+                className="tree-file"
+                onClick={() => handleStarterPrompt(file.prompt)}
+                disabled={loading}
+              >
+                <span className={`file-dot file-dot--${file.type}`} />
+                {file.name}
+              </button>
+            ))}
+
+
+
           </div>
 
-          {/* Navigation Mode Pill */}
-          <nav className="mode-toggle-group">
-            <button
-              className={`mode-btn ${mode === "chat" ? "active" : ""}`}
-              onClick={() => setMode("chat")}
-            >
-              <ChatIcon />
-              <span>AI Chat</span>
-            </button>
-            <button
-              className={`mode-btn ${mode === "match" ? "active" : ""}`}
-              onClick={() => setMode("match")}
-            >
-              <TargetIcon />
-              <span>Fit Matcher</span>
-            </button>
-          </nav>
+          <p className="sidebar-label sidebar-label--spaced">candidate.json</p>
 
-          {/* Actions Right */}
-          <div className="nav-actions-group">
-            {mode === "chat" && messages.length > 0 && (
+          <div className="json-card">
+
+            <div className="json-line">
+              <span className="json-punct">{"{"}</span>
+            </div>
+
+            <div className="json-line json-line--indent">
+              <span className="json-key">"name"</span>
+              <span className="json-punct">: </span>
+              <span className="json-string">"{CANDIDATE.name}"</span>
+              <span className="json-punct">,</span>
+            </div>
+
+            <div className="json-line json-line--indent">
+              <span className="json-key">"role"</span>
+              <span className="json-punct">: </span>
+              <span className="json-string">"{CANDIDATE.role}"</span>
+              <span className="json-punct">,</span>
+            </div>
+
+            {CANDIDATE_JSON.map((fact) => (
+              <div className="json-line json-line--indent" key={fact.key}>
+                <span className="json-key">"{fact.key}"</span>
+                <span className="json-punct">: </span>
+                <span className="json-string">"{fact.value}"</span>
+                <span className="json-punct">,</span>
+              </div>
+            ))}
+
+            <div className="json-line json-line--indent">
+              <span className="json-key">"status"</span>
+              <span className="json-punct">: </span>
+              <span className="json-string json-string--status">"online"</span>
+            </div>
+
+            <div className="json-line">
+              <span className="json-punct">{"}"}</span>
+            </div>
+
+          </div>
+
+        </aside>
+
+
+        {/* =================================================
+            MAIN
+        ================================================= */}
+
+        <main className="main">
+
+          <div className="tab-bar">
+
+            <div className="tabs">
+
               <button
-                className="action-pill-btn"
-                onClick={handleResetChat}
-                title="Return to Bento Hub"
+                className={mode === "chat" ? "tab active" : "tab"}
+                onClick={() => setMode("chat")}
               >
-                <GridIcon />
-                <span className="btn-hide-mobile">Bento Hub</span>
+                <span className="tab-dot tab-dot--chat" />
+                chat.tsx
+              </button>
+
+              <button
+                className={mode === "match" ? "tab active" : "tab"}
+                onClick={() => setMode("match")}
+              >
+                <span className="tab-dot tab-dot--match" />
+                match.run
+              </button>
+
+            </div>
+
+            {mode === "chat" && messages.length > 0 && (
+              <button className="tab-action" onClick={handleNewChat} aria-label="Restart session">
+                <RestartIcon />
               </button>
             )}
 
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="action-pill-btn resume-action-btn"
-              title="Open Sumit's Resume (PDF)"
-            >
-              <span>Resume PDF</span>
-              <ExternalIcon />
-            </a>
-
-            <button
-              className="theme-circle-btn"
-              onClick={toggleTheme}
-              title={`Switch to ${theme === "dark" ? "Light" : "Dark"} mode`}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <MoonIcon /> : <SunIcon />}
-            </button>
           </div>
-        </div>
-      </header>
 
-      {/* =====================================================
-          MAIN WORKSPACE
-      ===================================================== */}
-      <main className="bento-main">
-        {/* ===================================================
-            1. CHAT MODE
-        =================================================== */}
-        {mode === "chat" && (
-          <div className="chat-interface">
-            <div className="chat-scroll-zone" ref={scrollRef}>
-              {messages.length === 0 ? (
-                /* ===========================================
-                   INTERACTIVE BENTO GRID HUB (EMPTY HERO)
-                =========================================== */
-                <div className="bento-hub-grid">
-                  {/* Tile 1: Hero Persona Card (2 Columns Wide) */}
-                  <div className="bento-tile tile-hero">
-                    <div className="hero-top">
-                      <div className="hero-avatar">
-                        <span>SK</span>
-                        <span className="hero-avatar-glow" />
-                      </div>
-                      <div className="hero-meta">
-                        <span className="status-tag">● {CANDIDATE.status}</span>
-                        <h2 className="hero-name">{CANDIDATE.name}</h2>
-                        <p className="hero-role">{CANDIDATE.role}</p>
-                      </div>
+
+          {/* ===============================================
+              CHAT MODE
+          =============================================== */}
+
+          {mode === "chat" && (
+
+            <>
+
+              <div className="console" ref={scrollRef}>
+
+                {messages.length === 0 && (
+                  <div className="motd">
+                    <div className="motd-badge">
+                      <span className="badge-pulse" />
+                      <span>Online · Sumit Kumar Portfolio AI</span>
                     </div>
 
-                    <p className="hero-bio">
-                      Master of Computer Applications (MCA) student at <strong>NIT Jamshedpur</strong>. Building high-performance full-stack applications, intelligent AI matching systems, and scalable backend pipelines.
+                    <h1 className="motd-headline">
+                      Hi! Ask me anything about <span className="text-gradient">Sumit</span>
+                    </h1>
+
+                    <p className="motd-desc">
+                      MCA student at NIT Jamshedpur specializing in AI/ML Engineering and Full-Stack Development. Type your question below or click a starter:
                     </p>
 
-                    <div className="hero-footer-actions">
-                      <a
-                        href="/resume.pdf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bento-btn-primary"
-                      >
-                        <span>Download Official Resume</span>
-                        <ExternalIcon />
-                      </a>
+                    <div className="motd-starters">
                       <button
-                        className="bento-btn-secondary"
-                        onClick={() => sendMessage("Tell me about Sumit's complete background and education")}
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("What projects has Sumit built?")}
                       >
-                        Ask Background
+                        <span className="starter-icon">🚀</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Projects</span>
+                          <span className="starter-query">AI Database Query Assistant, Book Store...</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("What is Sumit's technical skillset and background?")}
+                      >
+                        <span className="starter-icon">⚡</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Tech Stack</span>
+                          <span className="starter-query">Python, React, Node.js, C++ DSA...</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("Tell me about his education and internship experience")}
+                      >
+                        <span className="starter-icon">🎓</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Experience & College</span>
+                          <span className="starter-query">NIT Jamshedpur (MCA) & Shikom Intern</span>
+                        </div>
+                      </button>
+
+                      <button
+                        className="starter-card"
+                        onClick={() => handleStarterPrompt("sumit kon hai batana")}
+                      >
+                        <span className="starter-icon">💬</span>
+                        <div className="starter-info">
+                          <span className="starter-title">Hindi / Hinglish</span>
+                          <span className="starter-query">Sumit ke baare me Hindi me jaano</span>
+                        </div>
                       </button>
                     </div>
                   </div>
+                )}
 
-                  {/* Tile 2: AI Core Interaction Card */}
-                  <div
-                    className="bento-tile tile-ai-core"
-                    onClick={() => sendMessage("What makes Sumit stand out as a Full-Stack & AI engineer?")}
-                  >
-                    <div className="ai-core-graphic">
-                      <div className="ai-core-ring ring-ext" />
-                      <div className="ai-core-ring ring-mid" />
-                      <div className="ai-core-center">✦</div>
-                    </div>
-                    <h3 className="tile-title">Portfolio AI Core</h3>
-                    <p className="tile-desc">Instant answers on technical depth, problem-solving, and code quality.</p>
-                    <span className="tile-action-link">Click to inquire →</span>
-                  </div>
-
-                  {/* Tile 3: Key Projects Showcase (Full Row / 3 Columns Wide) */}
-                  <div className="bento-tile tile-projects">
-                    <div className="tile-header-row">
-                      <div>
-                        <span className="tile-kicker">Featured Engineering</span>
-                        <h3 className="tile-title">Key Projects Showcase</h3>
-                      </div>
-                      <span className="tile-badge">4 Featured</span>
-                    </div>
-
-                    <div className="bento-projects-subgrid">
-                      {BENTO_PROJECTS.map((proj) => (
-                        <div
-                          key={proj.title}
-                          className="project-subcard"
-                          onClick={() => sendMessage(proj.prompt)}
-                        >
-                          <div className="proj-card-top">
-                            <span className="proj-tag" style={{ color: proj.color, borderColor: `${proj.color}40`, background: `${proj.color}15` }}>
-                              {proj.tag}
-                            </span>
-                            <span className="proj-arrow">↗</span>
-                          </div>
-                          <h4 className="proj-title">{proj.title}</h4>
-                          <p className="proj-desc">{proj.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tile 4: Tech Stack Cloud */}
-                  <div className="bento-tile tile-tech">
-                    <span className="tile-kicker">Core Capabilities</span>
-                    <h3 className="tile-title">Technical Matrix</h3>
-                    <div className="tech-badge-cloud">
-                      {TECH_BADGES.map((tech) => (
-                        <button
-                          key={tech.name}
-                          className={`tech-badge-pill badge-${tech.cat}`}
-                          onClick={() => sendMessage(`What is Sumit's proficiency and experience with ${tech.name}?`)}
-                          title={`Ask about ${tech.name}`}
-                        >
-                          {tech.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Tile 5: Fit Matcher Launchpad */}
-                  <div
-                    className="bento-tile tile-matcher-launch"
-                    onClick={() => setMode("match")}
-                  >
-                    <div className="matcher-icon-box">
-                      <TargetIcon />
-                    </div>
-                    <span className="tile-kicker">Role Compatibility</span>
-                    <h3 className="tile-title">Resume Fit Screener</h3>
-                    <p className="tile-desc">Paste your job description to calculate suitability & requirement alignment.</p>
-                    <span className="tile-action-link">Open Analyzer →</span>
-                  </div>
-
-                  {/* Tile 6: Hindi Conversation */}
-                  <div
-                    className="bento-tile tile-hindi"
-                    onClick={() => sendMessage("sumit kon hai batana")}
-                  >
-                    <span className="hindi-badge">💬 हिंदी / Hinglish</span>
-                    <h3 className="tile-title">बातचीत करें</h3>
-                    <p className="tile-desc">Sumit ke baare me simple Hindi me sawal puchein aur jaaniye.</p>
-                    <span className="tile-action-link">Hindi me shuru karein →</span>
-                  </div>
-                </div>
-              ) : (
-                /* ===========================================
-                   ACTIVE CONVERSATION FEED
-                =========================================== */
-                <div className="conversation-stream">
+                <div className="log">
                   {messages.map((message, index) => {
                     const isLast = index === messages.length - 1;
-                    const isStreaming = loading && isLast && message.role === "assistant";
-                    const isWaitingFirstToken = isStreaming && !message.content;
+                    const isStreamingThis = loading && isLast && message.role === "assistant";
+                    const isWaitingFirstToken = isStreamingThis && !message.content;
 
                     return (
                       <div
                         key={index}
-                        className={`message-row ${message.role === "user" ? "row-user" : "row-ai"}`}
+                        className={`log-line log-line--${message.role}`}
                       >
-                        {message.role === "assistant" && (
-                          <div className="ai-badge-avatar">
-                            <SparkleIcon />
-                          </div>
-                        )}
+                        <span className="log-prefix">
+                          {message.role === "user" ? "$" : ">"}
+                        </span>
 
-                        <div className={`bento-bubble ${message.role === "user" ? "bubble-user" : "bubble-ai"}`}>
+                        <div className="log-content">
                           {message.role === "user" ? (
-                            <div className="user-text-content">{message.content}</div>
+                            <span className="log-text">{message.content}</span>
                           ) : isWaitingFirstToken ? (
-                            <div className="thinking-row">
-                              <span className="wave-dot" />
-                              <span className="wave-dot" />
-                              <span className="wave-dot" />
-                              <span className="thinking-text">Sumit.ai is synthesizing answer...</span>
+                            <div className="ai-thinking">
+                              <span className="thinking-pulse" />
+                              <span className="thinking-text">Thinking...</span>
                             </div>
                           ) : (
-                            <div className="ai-markdown-wrap">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {message.content}
-                              </ReactMarkdown>
-
-                              {isStreaming && <span className="streaming-cursor-bar">▋</span>}
-
-                              {!isStreaming && message.content && (
-                                <div className="bubble-footer-bar">
+                            <div className="ai-bubble">
+                              <div className="ai-response">
+                                <ReactMarkdown 
+  remarkPlugins={[remarkGfm]}
+  components={{
+    a: ({ node, href, children, ...props }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="chat-external-link"
+        {...props}
+      >
+        {children} <span className="ext-icon">↗</span>
+      </a>
+    )
+  }}
+>
+  {message.content}
+</ReactMarkdown>
+                                {isStreamingThis && <span className="streaming-cursor">▊</span>}
+                              </div>
+                              {!isStreamingThis && message.content && (
+                                <div className="ai-actions">
                                   <button
-                                    className="copy-btn-minimal"
+                                    className="action-btn copy-btn"
                                     onClick={() => handleCopy(message.content, index)}
                                     title="Copy response"
                                   >
                                     {copiedIndex === index ? <CheckIcon /> : <CopyIcon />}
-                                    <span>{copiedIndex === index ? "Copied" : "Copy"}</span>
+                                    <span>{copiedIndex === index ? "Copied!" : "Copy"}</span>
                                   </button>
                                 </div>
                               )}
@@ -660,206 +711,218 @@ function App() {
                     );
                   })}
                 </div>
-              )}
-            </div>
 
-            {/* Quick Suggestion Pills (Available in chat) */}
-            {messages.length > 0 && !loading && (
-              <div className="pills-scroll-row">
-                {SUGGESTION_PILLS.map((pill, i) => (
+              </div>
+
+              <div className="input-dock">
+                <div className="input-box">
+                  <div className="input-prefix">
+                    <span className="terminal-symbol">$</span>
+                  </div>
+
+                  <textarea
+                    value={input}
+                    onChange={(event) => setInput(event.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={`Ask about ${CANDIDATE.name}...`}
+                    rows="1"
+                    disabled={loading}
+                  />
+
                   <button
-                    key={i}
-                    className="suggestion-pill-item"
-                    onClick={() => sendMessage(pill)}
+                    className={`send-btn ${input.trim() ? "send-btn--active" : ""}`}
+                    onClick={() => sendMessage()}
+                    disabled={loading || !input.trim()}
+                    aria-label="Send message"
                   >
-                    {pill}
+                    <SendArrowIcon />
                   </button>
-                ))}
-              </div>
-            )}
-
-            {/* Floating Glass Input Bar */}
-            <div className="bento-input-dock">
-              <div className="dock-card">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask about projects, technical depth, problem-solving, or hire Sumit..."
-                  rows={1}
-                  disabled={loading}
-                  className="bento-textarea"
-                />
-
-                <button
-                  className={`dock-send-btn ${input.trim() ? "dock-send-active" : ""}`}
-                  onClick={() => sendMessage()}
-                  disabled={loading || !input.trim()}
-                  aria-label="Send message"
-                  title="Send message"
-                >
-                  <SendIcon />
-                </button>
+                </div>
               </div>
 
-              <div className="dock-hint-line">
-                <span>Press <strong>Enter</strong> to send · <strong>Shift + Enter</strong> for new line</span>
-              </div>
-            </div>
-          </div>
-        )}
+            </>
 
-        {/* ===================================================
-            2. JOB FIT MATCHER MODE
-        =================================================== */}
-        {mode === "match" && (
-          <div className="matcher-workspace">
-            <div className="matcher-banner-card">
-              <div className="matcher-icon-circle">
-                <TargetIcon />
-              </div>
-              <div>
-                <h2 className="matcher-heading">Resume Fit & Requirement Screener</h2>
-                <p className="matcher-subheading">
-                  Paste any job description (JD) or list of requirements to calculate candidate suitability, matched skills, and recommendations.
+          )}
+
+
+          {/* ===============================================
+              JOB MATCH MODE
+          =============================================== */}
+
+          {mode === "match" && (
+
+            <div className="console match-console">
+
+              <div className="match-intro">
+                <p className="match-heading">Run a fit check</p>
+                <p className="match-sub">
+                  Paste a job description below and see how {CANDIDATE.name}
+                  {" "}lines up, requirement by requirement.
                 </p>
               </div>
-            </div>
 
-            <div className="matcher-layout-grid">
-              {/* Left Column: Input Card */}
-              <div className="matcher-card editor-pane">
-                <div className="pane-header">
-                  <span className="pane-title">Job Description / Requirements</span>
-                  {jobDescription && (
-                    <button className="btn-text-clear" onClick={() => setJobDescription("")}>
-                      Clear
-                    </button>
-                  )}
+              <div className="editor-card">
+
+                <label htmlFor="jd" className="editor-label">
+                  job_description.txt
+                </label>
+
+                <div className="editor-body">
+
+                  <div className="gutter" ref={gutterRef}>
+                    {lineNumbers.map((n) => (
+                      <div key={n}>{n}</div>
+                    ))}
+                  </div>
+
+                  <textarea
+                    id="jd"
+                    className="editor-textarea"
+                    value={jobDescription}
+                    onChange={(event) => setJobDescription(event.target.value)}
+                    onScroll={handleJdScroll}
+                    placeholder={"Paste the job description here…"}
+                    spellCheck="false"
+                  />
+
                 </div>
 
-                <textarea
-                  className="jd-editor-textarea"
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Paste the job description, roles, or key skill requirements here..."
-                  spellCheck="false"
-                />
-
-                <div className="pane-footer">
-                  <button
-                    className="btn-analyze-match"
-                    onClick={handleMatchCheck}
-                    disabled={matchLoading || !jobDescription.trim()}
-                  >
-                    {matchLoading ? "Analyzing Candidate Fit..." : "⚡ Run AI Match Analysis"}
-                  </button>
-                </div>
+                <button
+                  className="run-analysis-btn"
+                  onClick={checkJobMatch}
+                  disabled={matchLoading || !jobDescription.trim()}
+                >
+                  {matchLoading ? "Running…" : "▶ Run analysis"}
+                </button>
 
                 {matchError && (
-                  <div className="error-badge-box">
-                    <span>⚠ {matchError}</span>
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "10px 14px",
+                    background: "rgba(244, 63, 94, 0.12)",
+                    border: "1px solid rgba(244, 63, 94, 0.35)",
+                    borderRadius: "6px",
+                    color: "#fb7185",
+                    fontSize: "13px",
+                    lineHeight: "1.4"
+                  }}>
+                    ⚠ {matchError}
                   </div>
                 )}
+
               </div>
 
-              {/* Right Column: Scorecard & Breakdown */}
-              <div className="matcher-card results-pane">
-                {matchResult ? (
-                  <div className="results-wrapper">
-                    {/* Score Bar */}
-                    <div className="scorecard-top">
-                      <div className="scorecard-row">
-                        <span className="scorecard-label">Suitability Rating</span>
-                        <span className="scorecard-big">{matchResult.suitability_score}%</span>
-                      </div>
-                      <div className="scorecard-track">
-                        <div
-                          className="scorecard-fill"
-                          style={{
-                            width: `${Math.min(100, Math.round(matchResult.suitability_score))}%`,
-                            background:
-                              matchResult.suitability_score >= 75
-                                ? "linear-gradient(90deg, #10b981, #06b6d4)"
-                                : matchResult.suitability_score >= 50
-                                ? "linear-gradient(90deg, #f59e0b, #eab308)"
-                                : "linear-gradient(90deg, #f43f5e, #fb7185)",
-                          }}
-                        />
-                      </div>
+              {matchResult && (
+
+                <div className="match-output">
+
+                  <div className="meter-card">
+
+                    <div className="meter-head">
+                      <span className="meter-label">overall_fit</span>
+                      <span className="meter-value" style={{ color: `var(${meta.colorVar})` }}>
+                        {meta.value}%
+                      </span>
                     </div>
 
-                    {/* Recommendation */}
-                    <div className="insight-card rec-card">
-                      <span className="kicker-tag">Recommendation</span>
-                      <p className="rec-body">{matchResult.recommendation}</p>
+                    <div className="meter-track">
+                      <div
+                        className="meter-fill"
+                        style={{
+                          width: `${meta.value}%`,
+                          background: `var(${meta.colorVar})`,
+                        }}
+                      />
                     </div>
 
-                    {/* Skills Breakdown */}
-                    <div className="skills-split-row">
-                      <div className="skill-bucket bucket-match">
-                        <h5 className="bucket-title">✓ Matched Skills ({matchResult.matched_skills?.length || 0})</h5>
-                        <div className="bucket-pills">
-                          {(matchResult.matched_skills || []).map((s, i) => (
-                            <span key={i} className="chip-pill pill-green">{s}</span>
-                          ))}
-                        </div>
-                      </div>
+                    <p className="meter-status" style={{ color: `var(${meta.colorVar})` }}>
+                      [{meta.tag}] {meta.text}
+                    </p>
 
-                      <div className="skill-bucket bucket-gap">
-                        <h5 className="bucket-title">− Skill Gaps ({matchResult.missing_skills?.length || 0})</h5>
-                        <div className="bucket-pills">
-                          {(matchResult.missing_skills || []).map((s, i) => (
-                            <span key={i} className="chip-pill pill-red">{s}</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Strengths & Considerations */}
-                    <div className="points-split-row">
-                      <div className="point-card">
-                        <h5 className="point-title">Candidate Strengths</h5>
-                        <ul className="point-list">
-                          {(matchResult.candidate_strengths || []).map((item, i) => (
-                            <li key={i}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="point-card">
-                        <h5 className="point-title">Considerations</h5>
-                        <ul className="point-list">
-                          {(matchResult.candidate_gaps || []).map((item, i) => (
-                            <li key={i}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Detailed Rationale */}
-                    <div className="insight-card">
-                      <span className="kicker-tag">Detailed Fit Rationale</span>
-                      <p className="rec-body">{matchResult.explanation}</p>
-                    </div>
                   </div>
-                ) : (
-                  <div className="results-idle">
-                    <span className="idle-pill">AI Evaluator</span>
-                    <h3 className="idle-heading">How the Fit Analyzer Works</h3>
-                    <p className="idle-text">
-                      Paste a Job Description on the left and run analysis. The system parses requirements against Sumit's actual coursework at NIT Jamshedpur, verified projects, and full-stack technical competencies to deliver an objective compatibility report.
+
+                  <div className="log-block">
+                    <span className="log-tag">recommendation</span>
+                    <p>{matchResult.recommendation || "No recommendation available."}</p>
+                  </div>
+
+                  <div className="diff-card">
+
+                    <div className="diff-col diff-col--add">
+                      <p className="diff-head">+ matches</p>
+                      {(matchResult.matched_skills || []).map((skill, index) => (
+                        <p className="diff-line diff-line--add" key={index}>+ {skill}</p>
+                      ))}
+                    </div>
+
+                    <div className="diff-col diff-col--del">
+                      <p className="diff-head">− gaps</p>
+                      {(matchResult.missing_skills || []).map((skill, index) => (
+                        <p className="diff-line diff-line--del" key={index}>− {skill}</p>
+                      ))}
+                    </div>
+
+                  </div>
+
+                  <div className="notes-columns">
+
+                    <div className="notes-card notes-card--mint">
+                      <p className="notes-head"># strengths</p>
+                      {(matchResult.candidate_strengths || []).map((item, index) => (
+                        <p className="notes-line" key={index}>— {item}</p>
+                      ))}
+                    </div>
+
+                    <div className="notes-card notes-card--amber">
+                      <p className="notes-head"># considerations</p>
+                      {(matchResult.candidate_gaps || []).map((item, index) => (
+                        <p className="notes-line" key={index}>— {item}</p>
+                      ))}
+                    </div>
+
+                  </div>
+
+                  <div className="comment-block">
+                    <p className="comment-head">/* why this score */</p>
+                    <p className="comment-text">
+                      {matchResult.explanation || "No explanation available."}
                     </p>
                   </div>
-                )}
-              </div>
+
+                </div>
+
+              )}
+
+              {!matchResult && !matchLoading && (
+
+                <div className="checklist-card">
+
+                  <p className="checklist-head">// this checks</p>
+
+                  <div className="checklist">
+                    {CHECKLIST_ITEMS.map((item) => (
+                      <p className="checklist-item" key={item}>
+                        <span className="checkbox" />
+                        {item}
+                      </p>
+                    ))}
+                  </div>
+
+                </div>
+
+              )}
+
             </div>
-          </div>
-        )}
-      </main>
+
+          )}
+
+        </main>
+
+      </div>
+
     </div>
   );
 }
+
 
 export default App;

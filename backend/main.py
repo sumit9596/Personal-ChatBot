@@ -26,11 +26,11 @@ import time
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from dotenv import load_dotenv
-import groq
 from groq import Groq
+import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -42,18 +42,122 @@ from pydantic import BaseModel, Field
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("ai_resume")
 
+load_dotenv(Path(__file__).parent / ".env")
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY is not set in environment or .env file.")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
 
-# Set reasonable timeouts and max_retries=1 to prevent long hanging on rate limits
-client = Groq(api_key=GROQ_API_KEY, timeout=15.0, max_retries=1)
+if not GROQ_API_KEY and not GEMINI_API_KEY:
+    raise ValueError("Neither GROQ_API_KEY nor GEMINI_API_KEY is configured in environment.")
 
-# Primary & Fallback Models
-PRIMARY_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
-FALLBACK_MODEL = "openai/gpt-oss-120b"
+client = Groq(api_key=GROQ_API_KEY, timeout=15.0, max_retries=1) if GROQ_API_KEY else None
+
+# Primary & Fallback AI Models (Multi-Provider: Groq + Gemini)
+PRIMARY_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+FALLBACK_MODEL = "llama-3.1-8b-instant"
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
+if GEMINI_API_KEY:
+    logger.info(f"Google Gemini backup provider configured with model: {GEMINI_MODEL}")
+if GROQ_API_KEY:
+    logger.info(f"Groq primary provider configured with model: {PRIMARY_MODEL}")
+
+
+# ------------------------------------------------------------
+# 3. GOOGLE GEMINI BACKUP PROVIDER (AUTOMATIC RATE-LIMIT FAILOVER)
+# ------------------------------------------------------------
+def stream_gemini(conversation: list, system_prompt: str):
+    """
+    Streams responses from Google Gemini API via HTTPX SSE.
+    Acts as an automated backup when Groq rate limits are exceeded.
+    """
+    key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not key:
+        raise ValueError("GEMINI_API_KEY is not configured.")
+
+    model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:streamGenerateContent?alt=sse&key={key}"
+
+    contents = []
+    for msg in conversation:
+        if msg.get("role") == "system":
+            continue
+        role = "user" if msg.get("role") == "user" else "model"
+        contents.append({
+            "role": role,
+            "parts": [{"text": msg.get("content", "")}]
+        })
+
+    payload = {
+        "system_instruction": {
+            "parts": [{"text": system_prompt}]
+        },
+        "contents": contents,
+        "generationConfig": {
+            "temperature": 0.2
+        }
+    }
+
+    with httpx.Client(timeout=25.0) as http_client:
+        with http_client.stream("POST", url, json=payload) as response:
+            if response.status_code != 200:
+                err_text = response.read().decode("utf-8", errors="ignore")
+                raise RuntimeError(f"Gemini API returned status {response.status_code}: {err_text}")
+
+            for line in response.iter_lines():
+                if line.startswith("data: "):
+                    data_str = line[6:].strip()
+                    if not data_str or data_str == "[DONE]":
+                        continue
+                    try:
+                        chunk_json = json.loads(data_str)
+                        candidates = chunk_json.get("candidates", [])
+                        if candidates:
+                            parts = candidates[0].get("content", {}).get("parts", [])
+                            for part in parts:
+                                text_piece = part.get("text", "")
+                                if text_piece:
+                                    yield text_piece
+                    except Exception as parse_err:
+                        logger.debug(f"Error parsing Gemini SSE chunk: {parse_err}")
+
+
+def generate_gemini_json(prompt: str) -> dict:
+    """
+    Generates structured JSON using Google Gemini API for /match fallback.
+    """
+    key = os.getenv("GEMINI_API_KEY", "").strip()
+    if not key:
+        raise ValueError("GEMINI_API_KEY is not configured.")
+
+    model = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+
+    payload = {
+        "contents": [
+            {
+                "role": "user",
+                "parts": [{"text": prompt}]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.1,
+            "response_mime_type": "application/json"
+        }
+    }
+
+    with httpx.Client(timeout=30.0) as http_client:
+        response = http_client.post(url, json=payload)
+        if response.status_code != 200:
+            raise RuntimeError(f"Gemini API returned status {response.status_code}: {response.text}")
+        data = response.json()
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise RuntimeError("Gemini returned empty candidate response.")
+        raw_text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        clean_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip(), flags=re.MULTILINE)
+        return json.loads(clean_text)
 
 # ------------------------------------------------------------
 # 2. LOAD & CACHE CANDIDATE KNOWLEDGE BASE
@@ -127,6 +231,7 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins if os.getenv("ALLOW_ALL_ORIGINS") != "true" else ["*"],
+    allow_origin_regex=r"https://.*(\.vercel\.app|\.netlify\.app)" if os.getenv("ALLOW_ALL_ORIGINS") != "true" else None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,7 +246,7 @@ class ChatHistoryMessage(BaseModel):
 
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000, description="User question")
-    history: List[ChatHistoryMessage] = Field(default=[], max_length=20)
+    history: List[ChatHistoryMessage] = Field(default=[])
     active_role: Optional[str] = "ai_engineer"
 
 class MatchRequest(BaseModel):
@@ -168,6 +273,7 @@ class MatchResult(BaseModel):
 # 6. ENDPOINTS
 # ------------------------------------------------------------
 @app.get("/")
+@app.get("/health")
 def home():
     return {
         "status": "healthy",
@@ -239,9 +345,21 @@ FORMATTING & PRESENTATION (STRICT):
 - DO NOT default to markdown tables (| Col 1 | Col 2 |) unless the user explicitly requests a table ("show in a table" or "compare in a table"). Bullet lists are much cleaner and more readable in chat.
 
 CORE CANDIDATE FACTS:
-- Projects: AI Resume Matcher (Python, LLM, NLP, PyMuPDF, Pydantic), Draw.Together (Next.js/React, Node, Express, MongoDB, Tailwind, Excalidraw, JWT), Online Book Store (React, Node, Express, MongoDB), Movie Recommender App (Streamlit, Python, Pandas, TMDB API).
-- Internship: Frontend Developer at Shikom Internship Pvt. Ltd. (built the Karan Pest Control website).
-- Education: MCA at NIT Jamshedpur (2024–2027, CGPA 7.00), BCA from RLSY College Aurangabad (2020–2023, CGPA 8.50).
+- Flagship Academic Projects:
+  1. AI Database Query Assistant (AI/LLM Project — Python, Google Gemini, SQLAlchemy, sqlglot, Streamlit): AI-powered Text-to-SQL application that converts natural language questions into accurate SQL queries, auto-reads database schemas with SQLAlchemy, self-corrects failed queries, and blocks harmful commands (DROP, DELETE) using sqlglot safety validation.
+  2. Online Book Store Application (Full-Stack Project — React, JavaScript, HTML/CSS, Node.js, Express.js, MongoDB, Tailwind CSS, Axios): Full-stack bookstore with JWT auth, browsing/managing books with real-time updates, shopping cart, and responsive modern UI.
+  3. Movie Recommender App (ML Project — Streamlit, Python, Pandas, Numpy, TMDB API): Content-based recommendation system using cosine similarity on movie metadata with TMDB API integration and interactive filters.
+- Core Skills & Languages:
+  - Programming: C, C++ (Primary for DSA & algorithmic interviews), Java, Python, JavaScript.
+  - Core CS: Data Structures & Algorithms (DSA), OOPs, DBMS, Operating Systems, Computer Networks.
+  - Frontend: HTML/CSS, Tailwind CSS, React.
+  - Backend & Database: Node.js, Express.js, MongoDB, MySQL, SQL.
+  - Tools & Environment: Git/GitHub, Postman, VS Code, Linux (Basics), Docker (Basics & actively learning).
+- Docker & Linux Knowledge: Sumit has learned the core basics and fundamentals of Docker (containers, images, Dockerfiles) and Linux, and is an eager, fast learner actively expanding his containerization skills. If asked if Sumit knows Docker, state that he understands Docker fundamentals and is enthusiastic and eager to work with it.
+- Resume Sharing: If a user or recruiter asks for his resume, explain that his official resume is available upon request by emailing Sumit directly at officialsumit9596@gmail.com or messaging on LinkedIn (linkedin.com/in/sumit9596).
+- Internship: Frontend Developer Intern at Shikom Solutions Pvt. Ltd. (Dec 2025 – Jan 2026), developed client website for Karan Pest Control with React, Tailwind CSS, and JavaScript.
+- Education: MCA at NIT Jamshedpur (May 2024 – May 2027, 6.98 CGPA), BCA from RLSY College Aurangabad (May 2020 – May 2023, 7.47 CGPA).
+- Achievements: 8th rank in CodeNexus at NIT Jamshedpur, 300+ problems solved across LeetCode, GeeksforGeeks, and HackerRank (C++), 5-star gold badge on HackerRank in Problem Solving, C++, Java, and SQL.
 - Contact: Email (officialsumit9596@gmail.com), LinkedIn (linkedin.com/in/sumit9596), GitHub (github.com/sumit9596).
 
 CANDIDATE PROFILE DATA:
@@ -259,6 +377,7 @@ CANDIDATE PROFILE DATA:
         conversation.append({"role": "user", "content": clean_question})
 
     def generate():
+        # Tier 1: Primary Groq Model
         try:
             stream = client.chat.completions.create(
                 model=PRIMARY_MODEL,
@@ -270,29 +389,48 @@ CANDIDATE PROFILE DATA:
                 delta = chunk.choices[0].delta.content
                 if delta:
                     yield delta
-        except groq.RateLimitError:
-            logger.warning("Groq rate limit reached on primary model.")
-            yield "\n\n*The AI model is experiencing high demand right now. Please wait a moment and try again.*"
+            return
         except Exception as e:
-            logger.warning(f"Primary model ({PRIMARY_MODEL}) failed: {e}. Trying fallback...")
-            try:
-                stream_fallback = client.chat.completions.create(
-                    model=FALLBACK_MODEL,
-                    messages=conversation,
-                    temperature=0.2,
-                    stream=True
-                )
-                for chunk in stream_fallback:
-                    delta = chunk.choices[0].delta.content
-                    if delta:
-                        yield delta
-            except groq.RateLimitError:
-                yield "\n\n*The AI service is currently busy due to rate limits. Please try again shortly.*"
-            except Exception as err:
-                logger.error(f"Fallback model failed: {err}")
-                yield "\n\n*Unable to generate response at this moment. Please try again shortly.*"
+            logger.warning(f"Primary Groq model ({PRIMARY_MODEL}) failed or rate-limited: {e}. Trying fallback Groq model ({FALLBACK_MODEL})...")
 
-    return StreamingResponse(generate(), media_type="text/plain")
+        # Tier 2: Fallback Groq Model
+        try:
+            stream_fallback = client.chat.completions.create(
+                model=FALLBACK_MODEL,
+                messages=conversation,
+                temperature=0.2,
+                stream=True
+            )
+            for chunk in stream_fallback:
+                delta = chunk.choices[0].delta.content
+                if delta:
+                    yield delta
+            return
+        except Exception as err:
+            logger.warning(f"Fallback Groq model failed or rate-limited: {err}. Checking Google Gemini backup...")
+
+        # Tier 3: Google Gemini API Backup
+        gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+        if gemini_key:
+            try:
+                logger.info("Flipping traffic to Google Gemini backup provider...")
+                for chunk in stream_gemini(conversation, system_prompt):
+                    yield chunk
+                return
+            except Exception as gemini_err:
+                logger.error(f"Google Gemini backup failed: {gemini_err}")
+
+        yield "\n\n*The AI service is currently busy. Please wait a moment and try again.*"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/plain; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
 
 @app.post("/match", response_model=MatchResult)
 def match_job(request: MatchRequest, req: Request):
@@ -342,7 +480,7 @@ INSTRUCTIONS:
    - headline: tailored professional title matching the target position (e.g. "AI Engineer | NLP & LLM Applications" or "Full Stack Developer (React & Node)").
    - summary: 2-3 sentences highlighting Sumit's exact background that fits this specific job description.
    - highlighted_skills: 6-10 skills from Sumit's arsenal prioritized specifically for this JD.
-   - recommended_project_ids: list of project IDs from [ai-resume-matcher, draw-together, online-book-store, movie-recommender] ordered by which one the recruiter will find most impressive for this role.
+   - recommended_project_ids: list of project IDs from [ai-database-query-assistant, online-book-store, movie-recommender] ordered by which one the recruiter will find most impressive for this role.
    - relevance_highlights: 2-3 bullet highlights connecting his past work to the JD requirements.
 
 CRITICAL: Return ONLY valid JSON matching this exact structure:
@@ -358,13 +496,15 @@ CRITICAL: Return ONLY valid JSON matching this exact structure:
     "headline": "Full-Stack Web Developer",
     "summary": "Full-stack developer with hands-on experience in React, Node.js, Express, and MongoDB, ready to deliver scalable web solutions.",
     "highlighted_skills": ["React", "Node.js", "Express.js", "MongoDB", "Tailwind CSS"],
-    "recommended_project_ids": ["draw-together", "online-book-store", "ai-resume-matcher"],
+    "recommended_project_ids": ["online-book-store", "ai-database-query-assistant"],
     "relevance_highlights": ["Developed full-stack web apps with JWT authentication and responsive UI."]
   }}
 }}
 """
 
-    response = None
+    parsed = None
+
+    # Tier 1: Primary Groq Model
     try:
         response = client.chat.completions.create(
             model=PRIMARY_MODEL,
@@ -372,13 +512,12 @@ CRITICAL: Return ONLY valid JSON matching this exact structure:
             messages=[{"role": "user", "content": prompt}],
             response_format={"type": "json_object"}
         )
-    except groq.RateLimitError:
-        raise HTTPException(
-            status_code=429,
-            detail="The AI provider rate limit was reached. Please wait a moment before trying again."
-        )
+        raw_text = response.choices[0].message.content or ""
+        clean_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip(), flags=re.MULTILINE)
+        parsed = json.loads(clean_text)
     except Exception as e:
-        logger.warning(f"Primary model failed in /match: {e}. Trying fallback...")
+        logger.warning(f"Primary Groq model failed in /match: {e}. Trying fallback Groq model ({FALLBACK_MODEL})...")
+        # Tier 2: Fallback Groq Model
         try:
             response = client.chat.completions.create(
                 model=FALLBACK_MODEL,
@@ -386,30 +525,24 @@ CRITICAL: Return ONLY valid JSON matching this exact structure:
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )
-        except groq.RateLimitError:
-            raise HTTPException(
-                status_code=429,
-                detail="AI provider rate limit reached on fallback model."
-            )
+            raw_text = response.choices[0].message.content or ""
+            clean_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip(), flags=re.MULTILINE)
+            parsed = json.loads(clean_text)
         except Exception as fallback_err:
-            logger.error(f"Fallback model failed in /match: {fallback_err}")
-            raise HTTPException(
-                status_code=503,
-                detail="AI match evaluation is temporarily unavailable. Please try again shortly."
-            )
+            logger.warning(f"Fallback Groq model failed in /match: {fallback_err}. Checking Google Gemini backup...")
+            # Tier 3: Google Gemini API
+            gemini_key = os.getenv("GEMINI_API_KEY", "").strip()
+            if gemini_key:
+                try:
+                    logger.info("Using Google Gemini backup for /match evaluation...")
+                    parsed = generate_gemini_json(prompt)
+                except Exception as gemini_err:
+                    logger.error(f"Google Gemini /match backup failed: {gemini_err}")
 
-    raw_text = response.choices[0].message.content or ""
-    clean_text = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_text.strip(), flags=re.MULTILINE)
-    try:
-        parsed = json.loads(clean_text)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", raw_text, re.DOTALL)
-        if match:
-            try:
-                parsed = json.loads(match.group(0))
-            except Exception:
-                raise HTTPException(status_code=502, detail="Failed to parse structured match output.")
-        else:
-            raise HTTPException(status_code=502, detail="Model returned invalid JSON format.")
+    if not parsed:
+        raise HTTPException(
+            status_code=503,
+            detail="AI match evaluation is temporarily unavailable due to high provider traffic. Please try again shortly."
+        )
 
     return MatchResult(**parsed)
